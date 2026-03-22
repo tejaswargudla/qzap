@@ -1,269 +1,611 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>QueueZap – Admin Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#0F1117;--surface:#181C27;--surface2:#1F2435;--border:#2A2F42;
-  --orange:#FF6B35;--teal:#0EAD97;--yellow:#FFD23F;
-  --text:#E8EAF0;--text-muted:#6B7490;--text-dim:#9AA0B8;
-}
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QueueZap – Admin Login</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* animated background */
-.bg-grid{position:fixed;inset:0;background-image:radial-gradient(circle,rgba(255,107,53,0.06) 1px,transparent 1px);background-size:32px 32px;z-index:0;}
-.bg-glow{position:fixed;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse 60% 50% at 20% 30%,rgba(255,107,53,0.08) 0%,transparent 70%),
-    radial-gradient(ellipse 50% 60% at 80% 70%,rgba(14,173,151,0.06) 0%,transparent 70%);}
+    :root {
+      --bg: #0F1117;
+      --surface: #181C27;
+      --surface2: #1F2435;
+      --border: #2A2F42;
+      --orange: #FF6B35;
+      --teal: #0EAD97;
+      --yellow: #FFD23F;
+      --text: #E8EAF0;
+      --text-muted: #6B7490;
+      --text-dim: #9AA0B8;
+    }
 
-.login-wrap{position:relative;z-index:1;width:100%;max-width:420px;padding:1.5rem;}
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
 
-/* logo */
-.login-logo{text-align:center;margin-bottom:2rem;}
-.logo-text{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;display:inline-flex;align-items:center;gap:0.5rem;}
-.logo-zap{background:var(--orange);color:#fff;border-radius:8px;padding:3px 12px;font-size:1.5rem;}
-.logo-sub{font-size:0.82rem;color:var(--text-muted);margin-top:0.4rem;font-weight:500;}
+    /* animated background */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255, 107, 53, 0.06) 1px, transparent 1px);
+      background-size: 32px 32px;
+      z-index: 0;
+    }
 
-/* card */
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;box-shadow:0 30px 60px rgba(0,0,0,0.4);}
-.login-card h2{font-size:1.2rem;font-weight:800;margin-bottom:0.3rem;}
-.login-card p{font-size:0.82rem;color:var(--text-muted);margin-bottom:1.8rem;}
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 30%, rgba(255, 107, 53, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 70%, rgba(14, 173, 151, 0.06) 0%, transparent 70%);
+    }
 
-/* form */
-.form-group{margin-bottom:1.1rem;}
-label{display:block;font-size:0.78rem;font-weight:600;color:var(--text-dim);margin-bottom:0.4rem;}
-.input-wrap{position:relative;}
-.input-wrap input{
-  width:100%;background:var(--surface2);border:1px solid var(--border);
-  border-radius:10px;padding:0.75rem 1rem 0.75rem 2.8rem;
-  font-family:'Sora',sans-serif;font-size:0.92rem;color:var(--text);outline:none;
-  transition:border-color 0.15s,box-shadow 0.15s;
-}
-.input-wrap input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,0.15);}
-.input-wrap input.error{border-color:#FF4D6D;box-shadow:0 0 0 3px rgba(255,77,109,0.15);}
-.input-icon{position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);font-size:0.95rem;pointer-events:none;}
-.eye-btn{position:absolute;right:0.85rem;top:50%;transform:translateY(-50%);cursor:pointer;font-size:0.95rem;color:var(--text-muted);background:none;border:none;padding:0;}
-.eye-btn:hover{color:var(--text);}
+    .login-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 1.5rem;
+    }
 
-.error-msg{font-size:0.75rem;color:#FF4D6D;margin-top:0.35rem;display:none;}
-.error-msg.show{display:block;}
+    /* logo */
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
 
-/* hint box */
-.hint-box{
-  background:rgba(255,210,63,0.08);border:1px solid rgba(255,210,63,0.2);
-  border-radius:10px;padding:0.7rem 1rem;
-  display:flex;align-items:center;gap:0.6rem;
-  font-size:0.78rem;color:var(--text-dim);
-  margin-bottom:1.3rem;
-}
-.hint-box strong{color:var(--yellow);font-family:'JetBrains Mono',monospace;}
+    .logo-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-/* submit btn */
-.btn-login{
-  width:100%;padding:0.85rem;border-radius:10px;
-  background:var(--orange);color:#fff;border:none;
-  font-family:'Sora',sans-serif;font-size:0.95rem;font-weight:700;
-  cursor:pointer;transition:all 0.15s;
-  display:flex;align-items:center;justify-content:center;gap:0.5rem;
-  position:relative;overflow:hidden;
-}
-.btn-login:hover{background:#e85a27;transform:translateY(-1px);box-shadow:0 8px 20px rgba(255,107,53,0.3);}
-.btn-login:active{transform:translateY(0);}
-.btn-login.loading{pointer-events:none;opacity:0.8;}
-.btn-login .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;display:none;}
-.btn-login.loading .spinner{display:block;}
-.btn-login.loading .btn-text{display:none;}
-@keyframes spin{to{transform:rotate(360deg);}}
+    .logo-zap {
+      background: var(--orange);
+      color: #fff;
+      border-radius: 8px;
+      padding: 3px 12px;
+      font-size: 1.5rem;
+    }
 
-/* divider */
-.divider{display:flex;align-items:center;gap:0.75rem;margin:1.3rem 0;color:var(--text-muted);font-size:0.75rem;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+    .logo-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      font-weight: 500;
+    }
 
-/* back link */
-.back-link{text-align:center;margin-top:1.5rem;font-size:0.82rem;color:var(--text-muted);}
-.back-link a{color:var(--orange);text-decoration:none;font-weight:600;}
-.back-link a:hover{text-decoration:underline;}
+    /* card */
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    }
 
-/* shake animation */
-@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
-.shake{animation:shake 0.4s ease;}
+    .login-card h2 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+    }
 
-/* success overlay */
-.success-overlay{
-  position:fixed;inset:0;background:var(--bg);z-index:100;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.4s;
-}
-.success-overlay.show{opacity:1;pointer-events:all;}
-.success-icon{font-size:4rem;margin-bottom:1rem;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
-@keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
-.success-overlay h2{font-size:1.4rem;font-weight:800;margin-bottom:0.5rem;}
-.success-overlay p{color:var(--text-muted);font-size:0.9rem;}
-.progress-bar-wrap{width:200px;height:4px;background:var(--border);border-radius:2px;margin-top:1.5rem;overflow:hidden;}
-.progress-bar-fill{height:100%;background:var(--orange);border-radius:2px;width:0%;transition:width 1.8s linear;}
+    .login-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.8rem;
+    }
 
-/* phase banner */
-.phase-banner{
-  margin-top:1.5rem;background:var(--surface);border:1px solid var(--border);
-  border-radius:14px;padding:1rem 1.2rem;font-size:0.78rem;
-}
-.phase-banner .phase-title{font-weight:700;color:var(--text-dim);margin-bottom:0.6rem;display:flex;align-items:center;gap:0.4rem;}
-.phase-row{display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0;color:var(--text-muted);}
-.phase-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.dot-active{background:var(--orange);}
-.dot-next{background:var(--border);}
-.phase-row.current{color:var(--orange);font-weight:600;}
-</style>
+    /* form */
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem 0.75rem 2.8rem;
+      font-family: 'Sora', sans-serif;
+      font-size: 0.92rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+    }
+
+    .input-wrap input.error {
+      border-color: #FF4D6D;
+      box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.15);
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .eye-btn:hover {
+      color: var(--text);
+    }
+
+    .error-msg {
+      font-size: 0.75rem;
+      color: #FF4D6D;
+      margin-top: 0.35rem;
+      display: none;
+    }
+
+    .error-msg.show {
+      display: block;
+    }
+
+    /* hint box */
+    .hint-box {
+      background: rgba(255, 210, 63, 0.08);
+      border: 1px solid rgba(255, 210, 63, 0.2);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 1.3rem;
+    }
+
+    .hint-box strong {
+      color: var(--yellow);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* submit btn */
+    .btn-login {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 10px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login:hover {
+      background: #e85a27;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .btn-login.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .btn-login .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .btn-login.loading .spinner {
+      display: block;
+    }
+
+    .btn-login.loading .btn-text {
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.3rem 0;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* back link */
+    .back-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .back-link a {
+      color: var(--orange);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* shake animation */
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20% {
+        transform: translateX(-6px);
+      }
+
+      40% {
+        transform: translateX(6px);
+      }
+
+      60% {
+        transform: translateX(-4px);
+      }
+
+      80% {
+        transform: translateX(4px);
+      }
+    }
+
+    .shake {
+      animation: shake 0.4s ease;
+    }
+
+    /* success overlay */
+    .success-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+
+    .success-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .success-overlay h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .success-overlay p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .progress-bar-wrap {
+      width: 200px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 1.5rem;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--orange);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 1.8s linear;
+    }
+
+    /* phase banner */
+    .phase-banner {
+      margin-top: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      font-size: 0.78rem;
+    }
+
+    .phase-banner .phase-title {
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .phase-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.3rem 0;
+      color: var(--text-muted);
+    }
+
+    .phase-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-active {
+      background: var(--orange);
+    }
+
+    .dot-next {
+      background: var(--border);
+    }
+
+    .phase-row.current {
+      color: var(--orange);
+      font-weight: 600;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="bg-grid"></div>
-<div class="bg-glow"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
 
-<div class="login-wrap">
-  <!-- Logo -->
-  <div class="login-logo">
-    <div class="logo-text">Queue<span class="logo-zap">Zap</span> ⚡</div>
-    <div class="logo-sub">Admin Portal</div>
-  </div>
-
-  <!-- Login Card -->
-  <div class="login-card">
-    <h2>Welcome back 👋</h2>
-    <p>Sign in to manage your queues</p>
-
-    <!-- Dev hint -->
-    <div class="hint-box">
-      💡 Dev mode: use <strong>admin</strong> / <strong>admin</strong>
+  <div class="login-wrap">
+    <!-- Logo -->
+    <div class="login-logo">
+      <div class="logo-text">Queue<span class="logo-zap">Zap</span> ⚡</div>
+      <div class="logo-sub">Admin Portal</div>
     </div>
 
-    <div class="form-group">
-      <label>Username</label>
-      <div class="input-wrap">
-        <span class="input-icon">👤</span>
-        <input type="text" id="username" placeholder="Enter your username" autocomplete="username"/>
+    <!-- Login Card -->
+    <div class="login-card">
+      <h2>Welcome back 👋</h2>
+      <p>Sign in to manage your queues</p>
+
+      <!-- Dev hint -->
+      <div class="hint-box">
+        💡 Dev mode: use <strong>admin</strong> / <strong>admin</strong>
       </div>
-      <div class="error-msg" id="username-error">Please enter your username</div>
-    </div>
 
-    <div class="form-group">
-      <label>Password</label>
-      <div class="input-wrap">
-        <span class="input-icon">🔒</span>
-        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password"/>
-        <button class="eye-btn" onclick="togglePwd()" id="eye-btn">👁</button>
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="username" placeholder="Enter your username" autocomplete="username" />
+        </div>
+        <div class="error-msg" id="username-error">Please enter your username</div>
       </div>
-      <div class="error-msg" id="password-error">Please enter your password</div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+          <button class="eye-btn" onclick="togglePwd()" id="eye-btn">👁</button>
+        </div>
+        <div class="error-msg" id="password-error">Please enter your password</div>
+      </div>
+
+      <div class="error-msg show" id="login-error"
+        style="font-size:0.82rem;margin-bottom:1rem;display:none;background:rgba(255,77,109,0.1);padding:0.6rem 0.8rem;border-radius:8px;">
+      </div>
+
+      <button class="btn-login" id="login-btn" onclick="handleLogin()">
+        <div class="spinner"></div>
+        <span class="btn-text">Sign In →</span>
+      </button>
+
+      <div class="divider">or</div>
+      <div style="text-align:center;font-size:0.8rem;color:var(--text-muted);">
+        🔐 Google / Phone OTP login <span
+          style="background:rgba(14,173,151,0.15);color:var(--teal);padding:2px 8px;border-radius:50px;font-size:0.72rem;font-weight:700;">Coming
+          Phase 2</span>
+      </div>
     </div>
 
-    <div class="error-msg show" id="login-error" style="font-size:0.82rem;margin-bottom:1rem;display:none;background:rgba(255,77,109,0.1);padding:0.6rem 0.8rem;border-radius:8px;"></div>
+    <!-- Phase roadmap -->
+    <div class="phase-banner">
+      <div class="phase-title">🗺️ Auth Roadmap</div>
+      <div class="phase-row current"><span class="phase-dot dot-active"></span> Phase 1 — Admin/Admin (now)</div>
+      <div class="phase-row"><span class="phase-dot dot-next"></span> Phase 2 — Firebase Email + Password</div>
+      <div class="phase-row"><span class="phase-dot dot-next"></span> Phase 2 — Phone OTP (India-friendly)</div>
+      <div class="phase-row"><span class="phase-dot dot-next"></span> Phase 3 — Role-based access (Admin / Staff)</div>
+    </div>
 
-    <button class="btn-login" id="login-btn" onclick="handleLogin()">
-      <div class="spinner"></div>
-      <span class="btn-text">Sign In →</span>
-    </button>
+    <div class="back-link">← <a href="queuezap-landing.html">Back to landing page</a></div>
+  </div>
 
-    <div class="divider">or</div>
-    <div style="text-align:center;font-size:0.8rem;color:var(--text-muted);">
-      🔐 Google / Phone OTP login <span style="background:rgba(14,173,151,0.15);color:var(--teal);padding:2px 8px;border-radius:50px;font-size:0.72rem;font-weight:700;">Coming Phase 2</span>
+  <!-- Success Overlay -->
+  <div class="success-overlay" id="success-overlay">
+    <div class="success-icon">⚡</div>
+    <h2>Logging you in…</h2>
+    <p>Welcome back, Dr. Sharma!</p>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill"></div>
     </div>
   </div>
 
-  <!-- Phase roadmap -->
-  <div class="phase-banner">
-    <div class="phase-title">🗺️ Auth Roadmap</div>
-    <div class="phase-row current"><span class="phase-dot dot-active"></span> Phase 1 — Admin/Admin (now)</div>
-    <div class="phase-row"><span class="phase-dot dot-next"></span> Phase 2 — Firebase Email + Password</div>
-    <div class="phase-row"><span class="phase-dot dot-next"></span> Phase 2 — Phone OTP (India-friendly)</div>
-    <div class="phase-row"><span class="phase-dot dot-next"></span> Phase 3 — Role-based access (Admin / Staff)</div>
-  </div>
-
-  <div class="back-link">← <a href="queuezap-landing.html">Back to landing page</a></div>
-</div>
-
-<!-- Success Overlay -->
-<div class="success-overlay" id="success-overlay">
-  <div class="success-icon">⚡</div>
-  <h2>Logging you in…</h2>
-  <p>Welcome back, Dr. Sharma!</p>
-  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
-</div>
-
-<script>
-// Check if already logged in
-if (sessionStorage.getItem('queuezap_auth') === 'true') {
-  window.location.href = 'queuezap-admin.html';
-}
-
-function togglePwd() {
-  const inp = document.getElementById('password');
-  const btn = document.getElementById('eye-btn');
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-  else { inp.type = 'password'; btn.textContent = '👁'; }
-}
-
-function handleLogin() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const loginError = document.getElementById('login-error');
-  const btn = document.getElementById('login-btn');
-
-  // clear errors
-  document.getElementById('username-error').classList.remove('show');
-  document.getElementById('password-error').classList.remove('show');
-  loginError.style.display = 'none';
-  document.getElementById('username').classList.remove('error');
-  document.getElementById('password').classList.remove('error');
-
-  let valid = true;
-  if (!username) {
-    document.getElementById('username-error').classList.add('show');
-    document.getElementById('username').classList.add('error');
-    valid = false;
-  }
-  if (!password) {
-    document.getElementById('password-error').classList.add('show');
-    document.getElementById('password').classList.add('error');
-    valid = false;
-  }
-  if (!valid) return;
-
-  // loading state
-  btn.classList.add('loading');
-
-  setTimeout(() => {
-    // Phase 1: hardcoded check
-    if (username === 'admin' && password === 'admin') {
-      sessionStorage.setItem('queuezap_auth', 'true');
-      sessionStorage.setItem('queuezap_user', 'Dr. Raj Sharma');
-      btn.classList.remove('loading');
-      // show success
-      const overlay = document.getElementById('success-overlay');
-      overlay.classList.add('show');
-      setTimeout(() => {
-        document.getElementById('progress-fill').style.width = '100%';
-      }, 50);
-      setTimeout(() => { window.location.href = 'queuezap-admin.html'; }, 2000);
-    } else {
-      btn.classList.remove('loading');
-      loginError.textContent = '❌ Incorrect username or password. Try admin / admin';
-      loginError.style.display = 'block';
-      // shake the card
-      document.querySelector('.login-card').classList.add('shake');
-      setTimeout(() => document.querySelector('.login-card').classList.remove('shake'), 400);
-      document.getElementById('username').classList.add('error');
-      document.getElementById('password').classList.add('error');
+  <script>
+    // Check if already logged in
+    if (sessionStorage.getItem('queuezap_auth') === 'true') {
+      window.location.href = 'admin.html';
     }
-  }, 1200);
-}
 
-// Enter key support
-document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
-</script>
+    function togglePwd() {
+      const inp = document.getElementById('password');
+      const btn = document.getElementById('eye-btn');
+      if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+      else { inp.type = 'password'; btn.textContent = '👁'; }
+    }
+
+    function handleLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const loginError = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+
+      // clear errors
+      document.getElementById('username-error').classList.remove('show');
+      document.getElementById('password-error').classList.remove('show');
+      loginError.style.display = 'none';
+      document.getElementById('username').classList.remove('error');
+      document.getElementById('password').classList.remove('error');
+
+      let valid = true;
+      if (!username) {
+        document.getElementById('username-error').classList.add('show');
+        document.getElementById('username').classList.add('error');
+        valid = false;
+      }
+      if (!password) {
+        document.getElementById('password-error').classList.add('show');
+        document.getElementById('password').classList.add('error');
+        valid = false;
+      }
+      if (!valid) return;
+
+      // loading state
+      btn.classList.add('loading');
+
+      setTimeout(() => {
+        // Phase 1: hardcoded check
+        if (username === 'admin' && password === 'admin') {
+          sessionStorage.setItem('queuezap_auth', 'true');
+          sessionStorage.setItem('queuezap_user', 'Dr. Raj Sharma');
+          btn.classList.remove('loading');
+          // show success
+          const overlay = document.getElementById('success-overlay');
+          overlay.classList.add('show');
+          setTimeout(() => {
+            document.getElementById('progress-fill').style.width = '100%';
+          }, 50);
+          setTimeout(() => { window.location.href = 'admin.html'; }, 2000);
+        } else {
+          btn.classList.remove('loading');
+          loginError.textContent = '❌ Incorrect username or password. Try admin / admin';
+          loginError.style.display = 'block';
+          // shake the card
+          document.querySelector('.login-card').classList.add('shake');
+          setTimeout(() => document.querySelector('.login-card').classList.remove('shake'), 400);
+          document.getElementById('username').classList.add('error');
+          document.getElementById('password').classList.add('error');
+        }
+      }, 1200);
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  </script>
 </body>
+
 </html>
