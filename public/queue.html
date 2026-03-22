@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Join Queue – QueueZap</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --orange:#FF6B35;--orange-light:#FFF0EB;
+  --teal:#0EAD97;--teal-light:#E8FAF8;
+  --red:#FF4D6D;--red-light:#FFF0F3;
+  --text:#2D2D3A;--muted:#9AA0B8;
+  --bg:#F7F8FC;--white:#fff;--border:#E8EAF2;
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:420px;margin:0 auto;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+
+.screen{display:none;flex-direction:column;align-items:center;width:100%;animation:up 0.35s ease both;}
+.screen.active{display:flex;}
+@keyframes up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+.card{background:var(--white);border-radius:24px;padding:2rem 1.8rem;width:100%;box-shadow:0 4px 30px rgba(0,0,0,0.07);border:1px solid var(--border);text-align:center;}
+
+.logo{font-family:'Space Mono',monospace;font-size:0.82rem;font-weight:700;color:var(--muted);margin-bottom:1.8rem;}
+.logo b{background:var(--orange);color:#fff;border-radius:4px;padding:1px 6px;}
+
+.card h2{font-size:1.2rem;font-weight:900;margin-bottom:0.5rem;line-height:1.3;}
+.card p{font-size:0.87rem;color:var(--muted);line-height:1.65;margin-bottom:1.5rem;}
+
+.btn{width:100%;padding:0.95rem;border-radius:14px;border:none;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:0.45rem;}
+.btn-orange{background:var(--orange);color:#fff;box-shadow:0 5px 18px rgba(255,107,53,0.28);}
+.btn-orange:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,107,53,0.38);}
+.btn-orange:disabled{opacity:0.55;pointer-events:none;}
+
+.status-pill{display:flex;align-items:center;gap:0.5rem;border-radius:10px;padding:0.65rem 0.9rem;font-size:0.8rem;font-weight:700;margin-top:1rem;}
+.pill-loading{background:#FFF9E6;color:#8B6914;border:1px solid #FFD23F;}
+.pill-ok{background:var(--teal-light);color:#0a7a6b;border:1px solid rgba(14,173,151,0.3);}
+.pill-err{background:var(--red-light);color:#9b1535;border:1px solid rgba(255,77,109,0.3);}
+.spin{display:inline-block;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* form */
+.queue-tag{display:inline-flex;align-items:center;gap:0.35rem;background:var(--orange-light);color:var(--orange);border-radius:50px;padding:0.3rem 0.9rem;font-size:0.78rem;font-weight:800;margin-bottom:1.2rem;}
+.form-group{text-align:left;margin-bottom:1.1rem;width:100%;}
+label{display:block;font-size:0.78rem;font-weight:800;color:var(--text);margin-bottom:0.4rem;}
+.opt{font-size:0.7rem;font-weight:600;color:var(--muted);margin-left:0.3rem;}
+.inp-wrap{position:relative;}
+.inp-wrap input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:0.8rem 1rem 0.8rem 2.7rem;font-family:'Nunito',sans-serif;font-size:0.93rem;font-weight:600;color:var(--text);outline:none;transition:border-color 0.15s,box-shadow 0.15s;}
+.inp-wrap input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,0.1);background:var(--white);}
+.inp-wrap input.err{border-color:var(--red);}
+.inp-icon{position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);}
+.err-text{font-size:0.72rem;color:var(--red);margin-top:0.3rem;display:none;}
+.err-text.show{display:block;}
+
+/* ── POSITION SCREEN ── */
+.pos-header{margin-bottom:1.5rem;}
+.pos-header h2{font-size:1rem;font-weight:800;color:var(--muted);}
+.pos-name-tag{font-size:1.1rem;font-weight:900;color:var(--text);margin-top:0.2rem;}
+
+/* big number */
+.pos-big{
+  font-family:'Space Mono',monospace;
+  font-size:6.5rem;font-weight:700;line-height:1;
+  background:linear-gradient(135deg,var(--orange) 30%,#FFAA40 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes pop{from{transform:scale(0.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+.pos-sublabel{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.2rem;}
+
+/* progress bar */
+.progress-wrap{width:100%;margin:1.5rem 0;}
+.progress-label{display:flex;justify-content:space-between;font-size:0.72rem;font-weight:700;color:var(--muted);margin-bottom:0.5rem;}
+.progress-track{width:100%;height:10px;background:var(--border);border-radius:50px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--teal),var(--orange));transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1);}
+
+/* queue people graphic */
+.queue-visual{
+  display:flex;align-items:flex-end;justify-content:center;
+  gap:0.3rem;margin:0.5rem 0 1.5rem;height:52px;
+}
+.person{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  transition:all 0.4s ease;
+}
+.person-body{
+  width:10px;border-radius:3px 3px 0 0;
+  background:var(--border);transition:all 0.4s ease;
+}
+.person-head{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--border);transition:all 0.4s ease;
+}
+.person.you .person-body{background:var(--orange);}
+.person.you .person-head{background:var(--orange);}
+.person.served .person-body{background:#E8EAF2;opacity:0.3;}
+.person.served .person-head{background:#E8EAF2;opacity:0.3;}
+.person-label{font-size:0.55rem;font-weight:800;color:var(--orange);margin-top:2px;}
+
+.wait-pill{display:inline-flex;align-items:center;gap:0.35rem;background:var(--orange-light);color:var(--orange);border-radius:50px;padding:0.35rem 1rem;font-size:0.82rem;font-weight:800;}
+
+.live-row{display:flex;align-items:center;justify-content:center;gap:0.4rem;font-size:0.72rem;color:var(--teal);font-weight:700;margin-bottom:0.8rem;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:lp 1.5s ease-in-out infinite;}
+@keyframes lp{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+.notif-row{display:flex;align-items:center;gap:0.6rem;background:var(--teal-light);border-radius:12px;padding:0.85rem 1rem;margin-top:1.2rem;text-align:left;width:100%;}
+.notif-row p{font-size:0.78rem;color:#0a7a6b;font-weight:700;line-height:1.4;}
+
+.leave-btn{background:none;border:none;color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;margin-top:1.2rem;padding:0.4rem;}
+.leave-btn:hover{color:var(--red);}
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: LOCATION -->
+<div class="screen active" id="s-loc">
+  <div class="card">
+    <div class="logo">Queue<b>Zap</b> ⚡</div>
+    <div style="font-size:3.2rem;margin-bottom:1rem;animation:pulse 2s ease-in-out infinite;">📍</div>
+    <h2>Are you at the venue?</h2>
+    <p>We need your location to confirm you're nearby before joining the queue.</p>
+    <button class="btn btn-orange" id="loc-btn" onclick="checkLocation()">Allow Location →</button>
+    <div id="loc-status" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- SCREEN 2: FORM -->
+<div class="screen" id="s-form">
+  <div class="card">
+    <div class="logo">Queue<b>Zap</b> ⚡</div>
+    <div class="queue-tag">🏥 Dr. Sharma's Morning OPD</div>
+    <h2>Enter your details</h2>
+    <p>Just your name to get in line. Email is optional — only for notifications.</p>
+    <div class="form-group">
+      <label>Your Name <span style="color:var(--orange)">*</span></label>
+      <div class="inp-wrap">
+        <span class="inp-icon">👤</span>
+        <input type="text" id="inp-name" placeholder="e.g. Rahul Sharma" autocomplete="name"/>
+      </div>
+      <div class="err-text" id="err-name">Please enter your name</div>
+    </div>
+    <div class="form-group">
+      <label>Email <span class="opt">(optional — for notifications)</span></label>
+      <div class="inp-wrap">
+        <span class="inp-icon">✉️</span>
+        <input type="email" id="inp-email" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="err-text" id="err-email">Please enter a valid email</div>
+    </div>
+    <button class="btn btn-orange" id="join-btn" onclick="joinQueue()">⚡ Join Queue</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: POSITION -->
+<div class="screen" id="s-pos">
+  <div class="card">
+    <div class="logo">Queue<b>Zap</b> ⚡</div>
+    <div class="live-row"><div class="live-dot"></div> Live</div>
+
+    <div class="pos-sublabel">Your position</div>
+    <div class="pos-big" id="pos-num">6</div>
+    <div style="font-size:0.88rem;color:var(--muted);font-weight:700;margin-top:0.3rem;" id="pos-name-line">in queue</div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Start</span>
+        <span id="prog-label">6 people ahead</span>
+        <span>Your turn</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- People graphic -->
+    <div class="queue-visual" id="queue-visual"></div>
+
+    <div class="wait-pill" id="wait-pill">⏱ ~22 min wait</div>
+
+    <div class="notif-row" id="notif-row" style="display:none;">
+      <span>📧</span>
+      <p id="notif-text">We'll notify you when you're close</p>
+    </div>
+
+    <button class="leave-btn" onclick="leaveQueue()">Leave queue</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: TOO FAR -->
+<div class="screen" id="s-far">
+  <div class="card">
+    <div class="logo">Queue<b>Zap</b> ⚡</div>
+    <div style="font-size:3.2rem;margin-bottom:1rem;">🚫</div>
+    <h2>You're too far away</h2>
+    <p>You need to be within <strong>100 metres</strong> of the venue to join.<br/><br/>Please go to the location and try again.</p>
+    <button class="btn btn-orange" style="margin-top:0.5rem;" onclick="checkLocation()">🔄 Try Again</button>
+  </div>
+</div>
+
+<script>
+const API      = window.location.origin;
+const queueId  = new URLSearchParams(location.search).get('id');
+const CAPACITY = 10; // for progress bar scale
+
+let myPos    = 0;
+let myEntryId = null;
+let myName   = '';
+let myEmail  = '';
+let userLat  = null;
+let userLng  = null;
+let pollTimer = null;
+
+// ── If no queue ID in URL, show error ────────────────────────────────────────
+if (!queueId) {
+  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;text-align:center;padding:2rem;"><div><div style="font-size:3rem;">⚠️</div><h2 style="margin:1rem 0 0.5rem;">Invalid QR Code</h2><p style="color:#888;">This link is missing a queue ID. Please scan the QR code again.</p></div></div>';
+}
+
+// ── Load queue info on page load ─────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  if (!queueId) return;
+  try {
+    const res  = await fetch(`${API}/api/queues/${queueId}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    // Update queue name in form screen
+    document.querySelector('.queue-tag').textContent = `${data.category} ${data.name}`;
+    if (data.status !== 'active') {
+      show('s-far');
+      document.querySelector('#s-far h2').textContent = `Queue is ${data.status}`;
+      document.querySelector('#s-far p').textContent  = 'This queue is not accepting new entries right now.';
+      document.querySelector('#s-far button').style.display = 'none';
+    }
+  } catch (e) {
+    console.warn('Could not load queue info:', e.message);
+  }
+});
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── LOCATION — uses real browser GPS ─────────────────────────────────────────
+function checkLocation() {
+  const btn = document.getElementById('loc-btn');
+  const st  = document.getElementById('loc-status');
+  btn.innerHTML = '<span class="spin">⏳</span> Checking…';
+  btn.disabled  = true;
+  st.style.display = 'block';
+  st.className     = 'status-pill pill-loading';
+  st.innerHTML     = '<span class="spin">⏳</span> Getting your GPS location…';
+
+  if (!navigator.geolocation) {
+    st.className = 'status-pill pill-err';
+    st.innerHTML = '❌ Your browser does not support location';
+    btn.disabled = false; btn.innerHTML = 'Allow Location →';
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      st.innerHTML = '📡 Verifying distance to venue…';
+      // Send coords to backend — backend does the distance check
+      fetch(`${API}/api/queues/${queueId}`)
+        .then(r => r.json())
+        .then(queue => {
+          const dist = getDistanceMeters(userLat, userLng, queue.lat || 0, queue.lng || 0);
+          // If queue has no lat/lng yet (during dev), skip check
+          const withinRange = (!queue.lat && !queue.lng) || dist <= (queue.radius || 100);
+          if (withinRange) {
+            st.className = 'status-pill pill-ok';
+            st.innerHTML = `✅ You're nearby — good to go!`;
+            setTimeout(() => show('s-form'), 900);
+          } else {
+            show('s-far');
+          }
+        })
+        .catch(() => {
+          // If API fails, still let user join (backend will re-verify on join)
+          st.className = 'status-pill pill-ok';
+          st.innerHTML = '✅ Location received — proceeding…';
+          setTimeout(() => show('s-form'), 900);
+        });
+    },
+    (err) => {
+      st.className = 'status-pill pill-err';
+      st.innerHTML = '❌ Location denied — please allow location access and try again';
+      btn.disabled = false; btn.innerHTML = 'Allow Location →';
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// Haversine (client-side preview check — backend re-checks on join)
+function getDistanceMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ── JOIN — calls real API ─────────────────────────────────────────────────────
+async function joinQueue() {
+  const nameVal  = document.getElementById('inp-name').value.trim();
+  const emailVal = document.getElementById('inp-email').value.trim();
+
+  document.getElementById('err-name').classList.remove('show');
+  document.getElementById('err-email').classList.remove('show');
+  document.getElementById('inp-name').classList.remove('err');
+  document.getElementById('inp-email').classList.remove('err');
+
+  if (!nameVal) {
+    document.getElementById('err-name').classList.add('show');
+    document.getElementById('inp-name').classList.add('err');
+    return;
+  }
+  if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    document.getElementById('err-email').classList.add('show');
+    document.getElementById('inp-email').classList.add('err');
+    return;
+  }
+
+  const btn = document.getElementById('join-btn');
+  btn.innerHTML = '<span class="spin">⏳</span> Joining…';
+  btn.disabled  = true;
+
+  try {
+    const res  = await fetch(`${API}/api/queues/${queueId}/join`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: nameVal, email: emailVal,
+        userLat: userLat || 0, userLng: userLng || 0,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    myName    = nameVal;
+    myEmail   = emailVal;
+    myPos     = data.position;
+    myEntryId = data.entryId;
+
+    updatePositionUI(myPos, data.estimatedWait);
+    if (myEmail) {
+      document.getElementById('notif-row').style.display = 'flex';
+      document.getElementById('notif-text').textContent   = `We'll email ${myEmail} when you're 2 spots away`;
+    }
+
+    show('s-pos');
+    startPolling();
+  } catch (err) {
+    btn.innerHTML = '⚡ Join Queue';
+    btn.disabled  = false;
+    alert('Could not join: ' + err.message);
+  }
+}
+
+// ── UPDATE UI ─────────────────────────────────────────────────────────────────
+function updatePositionUI(pos, waitMin) {
+  const numEl = document.getElementById('pos-num');
+  numEl.style.transform  = 'scale(1.15)';
+  numEl.style.transition = 'transform 0.3s';
+  setTimeout(() => numEl.style.transform = 'scale(1)', 300);
+  numEl.textContent = pos;
+  document.getElementById('pos-name-line').textContent = `Hi ${myName} 👋`;
+  document.getElementById('wait-pill').textContent     = pos <= 1 ? '🎉 You\'re next!' : `⏱ ~${waitMin || pos*4} min wait`;
+  updateProgressBar(pos);
+  renderQueueVisual(pos);
+  const card = document.querySelector('#s-pos .card');
+  card.style.background = '#FFF0EB';
+  setTimeout(() => card.style.background = '', 600);
+}
+
+function updateProgressBar(pos) {
+  const pct   = Math.max(5, 100 - ((pos / (CAPACITY + 1)) * 100));
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent =
+    pos === 1 ? "You're next!" : `${pos-1} ${pos-1===1?'person':'people'} ahead`;
+}
+
+function renderQueueVisual(pos) {
+  const wrap  = document.getElementById('queue-visual');
+  wrap.innerHTML = '';
+  const total = Math.min(pos, 10);
+  for (let i = 1; i <= total; i++) {
+    const isYou = i === total;
+    const h     = isYou ? 32 : 20 + Math.floor(Math.random() * 10);
+    const div   = document.createElement('div');
+    div.className = 'person' + (isYou ? ' you' : '');
+    div.innerHTML = `<div class="person-head"></div><div class="person-body" style="height:${h}px"></div>${isYou?'<div class="person-label">You</div>':''}`;
+    wrap.appendChild(div);
+  }
+}
+
+// ── POLLING — checks position every 10 seconds ────────────────────────────────
+function startPolling() {
+  pollTimer = setInterval(async () => {
+    if (!myEntryId) return;
+    try {
+      const res  = await fetch(`${API}/api/queues/${queueId}/entries/${myEntryId}`);
+      const data = await res.json();
+      if (!res.ok) return;
+      if (data.status === 'done') {
+        clearInterval(pollTimer);
+        show('s-loc'); // queue done, reset
+        return;
+      }
+      if (data.position !== myPos) {
+        myPos = data.position;
+        updatePositionUI(myPos, data.estimatedWait);
+      }
+    } catch (e) { /* silent fail — will retry next interval */ }
+  }, 10000); // poll every 10 seconds
+}
+
+// ── LEAVE ─────────────────────────────────────────────────────────────────────
+async function leaveQueue() {
+  if (!confirm('Leave the queue?')) return;
+  clearInterval(pollTimer);
+  // Optionally call remove API — best effort
+  if (myEntryId) {
+    fetch(`${API}/api/queues/${queueId}/entries/${myEntryId}/remove`, { method:'DELETE' }).catch(()=>{});
+  }
+  myPos = 0; myName = ''; myEmail = ''; myEntryId = null;
+  show('s-loc');
+  document.getElementById('loc-btn').innerHTML = 'Allow Location →';
+  document.getElementById('loc-btn').disabled  = false;
+  document.getElementById('loc-status').style.display = 'none';
+}
+</script>
+</body>
+</html>
