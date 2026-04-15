@@ -1678,13 +1678,17 @@
     // ── CREATE QUEUE ──────────────────────────────────────────────────────────────
     async function createQueue() {
       const name = document.getElementById('q-name').value.trim();
-      const lat = document.getElementById('q-lat').value;
-      const lng = document.getElementById('q-lng').value;
       const cat = document.getElementById('q-category').value;
       const radius = parseInt(document.getElementById('q-radius').value) || 100;
       const desc = document.getElementById('q-desc').value.trim();
+      const isDemo = document.getElementById('demo-toggle').classList.contains('on');
 
-      if (!name || !lat || !lng) { showToast('Please fill required fields', 'error'); return; }
+      // lat/lng only required if NOT demo mode
+      const lat = document.getElementById('q-lat') ? document.getElementById('q-lat').value : '';
+      const lng = document.getElementById('q-lng') ? document.getElementById('q-lng').value : '';
+
+      if (!name) { showToast('Please enter a queue name', 'error'); return; }
+      if (!isDemo && (!lat || !lng)) { showToast('Please enter lat & lng or enable Demo Mode', 'error'); return; }
 
       const btn = document.querySelector('#modal .btn-orange');
       btn.innerHTML = '<span>Creating…</span>'; btn.disabled = true;
@@ -1692,11 +1696,16 @@
       try {
         const data = await api('/api/queues', {
           method: 'POST',
-          body: { name, category: cat, lat, lng, radius, description: desc }
+          body: {
+            name, category: cat, description: desc,
+            lat: isDemo ? 0 : lat,
+            lng: isDemo ? 0 : lng,
+            radius: isDemo ? 999999 : radius, // huge radius = anyone can join
+            demo: isDemo,
+          }
         });
         closeModal();
         showToast(`"${name}" created! Share QR to start.`, 'success');
-        // Show QR immediately
         showQRForQueue(data.queue.id, data.queue.queueUrl, data.qrCode);
         loadQueues(); loadDashboard();
       } catch (err) {
@@ -1704,6 +1713,13 @@
       } finally {
         btn.innerHTML = 'Create Queue ⚡'; btn.disabled = false;
       }
+    }
+
+    function toggleDemoMode() {
+      const toggle = document.getElementById('demo-toggle');
+      toggle.classList.toggle('on');
+      const isDemo = toggle.classList.contains('on');
+      document.getElementById('location-fields').style.display = isDemo ? 'none' : 'block';
     }
 
     // ── QR ────────────────────────────────────────────────────────────────────────
@@ -1727,8 +1743,10 @@
     // ── MODAL ─────────────────────────────────────────────────────────────────────
     function openModal() {
       document.getElementById('modal').classList.add('open');
-      ['q-name', 'q-lat', 'q-lng', 'q-desc'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('q-radius').value = '100';
+      ['q-name', 'q-desc'].forEach(id => document.getElementById(id).value = '');
+      // Reset demo mode to ON by default (easier for first time users)
+      document.getElementById('demo-toggle').classList.add('on');
+      document.getElementById('location-fields').style.display = 'none';
       document.getElementById('qr-url').textContent = `${window.location.origin}/queue?id=••••••`;
     }
     function closeModal() { document.getElementById('modal').classList.remove('open'); }

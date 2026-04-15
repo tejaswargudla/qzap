@@ -1,6 +1,6 @@
 const { v4: uuid } = require('uuid');
-const QRCode       = require('qrcode');
-const { db }       = require('./_firebase');
+const QRCode = require('qrcode');
+const { db } = require('./_firebase');
 const { cors, requireAdmin } = require('./_helpers');
 
 // POST /api/queues — admin creates a new queue
@@ -11,13 +11,16 @@ module.exports = async (req, res) => {
   const admin = await requireAdmin(req, res);
   if (!admin) return;
 
-  const { name, category, lat, lng, radius = 100, description = '' } = req.body;
-  if (!name || !lat || !lng) {
-    return res.status(400).json({ error: 'name, lat and lng are required' });
+  const { name, category, lat, lng, radius = 100, description = '', demo = false } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: 'name is required' });
+  }
+  if (!demo && (!lat || !lng)) {
+    return res.status(400).json({ error: 'lat and lng are required (or enable demo mode)' });
   }
 
   try {
-    const queueId  = uuid();
+    const queueId = uuid();
     const queueUrl = `${process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'http://localhost:3000'}/queue?id=${queueId}`;
 
     // Generate QR code as base64 image
@@ -29,8 +32,10 @@ module.exports = async (req, res) => {
     const queue = {
       id: queueId, name,
       category: category || '📦 Other',
-      lat: parseFloat(lat), lng: parseFloat(lng),
-      radius: parseInt(radius), description,
+      lat: parseFloat(lat) || 0,
+      lng: parseFloat(lng) || 0,
+      radius: parseInt(radius) || (demo ? 999999 : 100),
+      description, demo: !!demo,
       status: 'active',
       adminId: admin.uid,
       queueUrl,
