@@ -1,420 +1,1533 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>QueueZap – Admin Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#0F1117;--surface:#181C27;--surface2:#1F2435;--border:#2A2F42;
-  --orange:#FF6B35;--orange-dim:rgba(255,107,53,0.12);
-  --teal:#0EAD97;--teal-dim:rgba(14,173,151,0.12);
-  --yellow:#FFD23F;--yellow-dim:rgba(255,210,63,0.12);
-  --red:#FF4D6D;--red-dim:rgba(255,77,109,0.12);
-  --text:#E8EAF0;--text-muted:#6B7490;--text-dim:#9AA0B8;
-}
-html{scroll-behavior:smooth;}
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
-.sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 0;position:fixed;top:0;left:0;bottom:0;z-index:50;}
-.sidebar-logo{padding:0 1.5rem 1.5rem;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;}
-.sidebar-logo span{background:var(--orange);color:#fff;border-radius:6px;padding:2px 8px;font-size:1rem;}
-.sidebar-nav{padding:1.2rem 0;flex:1;}
-.nav-section-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;padding:0.5rem 1.5rem 0.3rem;}
-.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 1.5rem;color:var(--text-dim);font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.15s;border-left:3px solid transparent;text-decoration:none;user-select:none;}
-.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.04);}
-.nav-item.active{color:var(--orange);background:var(--orange-dim);border-left-color:var(--orange);font-weight:600;}
-.nav-icon{font-size:1rem;width:20px;text-align:center;}
-.nav-badge{margin-left:auto;background:var(--orange);color:#fff;border-radius:50px;padding:1px 7px;font-size:0.68rem;font-weight:700;}
-.sidebar-user{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;}
-.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--yellow));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:#fff;flex-shrink:0;}
-.user-name{font-size:0.82rem;font-weight:600;}
-.user-role{font-size:0.7rem;color:var(--text-muted);}
-.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:40;}
-.topbar-title{font-size:1.1rem;font-weight:700;}
-.topbar-right{display:flex;align-items:center;gap:1rem;}
-.notif-btn{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;position:relative;}
-.notif-btn:hover{background:var(--border);}
-.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--orange);border:1.5px solid var(--surface);}
-.page{display:none;padding:2rem;animation:fadeIn 0.3s ease;}
-.page.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;transition:border-color 0.2s,transform 0.2s;}
-.stat-card:hover{border-color:var(--orange);transform:translateY(-2px);}
-.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;}
-.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
-.si-orange{background:var(--orange-dim)}.si-teal{background:var(--teal-dim)}.si-yellow{background:var(--yellow-dim)}.si-red{background:var(--red-dim)}
-.stat-change{font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:50px;}
-.up{background:rgba(14,173,151,0.15);color:var(--teal)}.down{background:var(--red-dim);color:var(--red)}
-.stat-val{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;line-height:1;}
-.stat-label{font-size:0.78rem;color:var(--text-muted);margin-top:0.3rem;font-weight:500;}
-.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;}
-.section-hdr h2{font-size:1rem;font-weight:700;}
-.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1.1rem;border-radius:8px;font-family:'Sora',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;}
-.btn-orange{background:var(--orange);color:#fff}.btn-orange:hover{background:#e85a27;transform:translateY(-1px)}
-.btn-ghost{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}.btn-ghost:hover{background:var(--border);color:var(--text)}
-.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,77,109,0.2)}.btn-danger:hover{background:rgba(255,77,109,0.2)}
-.btn-teal{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(14,173,151,0.2)}.btn-teal:hover{background:rgba(14,173,151,0.2)}
-.btn-sm{padding:0.3rem 0.75rem;font-size:0.78rem;}
-.queues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;}
-.queue-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.4rem;transition:border-color 0.2s,transform 0.2s;position:relative;overflow:hidden;}
-.queue-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--yellow));}
-.queue-card:hover{border-color:var(--orange);transform:translateY(-3px);}
-.queue-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;}
-.queue-card-info h3{font-size:1rem;font-weight:700;margin-bottom:0.2rem;}
-.queue-card-info p{font-size:0.78rem;color:var(--text-muted);}
-.status-pill{padding:3px 10px;border-radius:50px;font-size:0.7rem;font-weight:700;white-space:nowrap;}
-.status-active{background:var(--teal-dim);color:var(--teal)}.status-paused{background:var(--yellow-dim);color:var(--yellow)}.status-closed{background:var(--red-dim);color:var(--red)}
-.queue-meta{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;}
-.meta-item{display:flex;align-items:center;gap:0.3rem;font-size:0.75rem;color:var(--text-muted);}
-.queue-progress{background:var(--surface2);border-radius:50px;height:6px;margin-bottom:1rem;overflow:hidden;}
-.queue-progress-bar{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--orange),var(--yellow));transition:width 0.5s ease;}
-.queue-actions{display:flex;gap:0.5rem;flex-wrap:wrap;}
-.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-table{width:100%;border-collapse:collapse;}
-thead{background:var(--surface2);}
-th{padding:0.75rem 1rem;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);border-bottom:1px solid var(--border);}
-td{padding:0.85rem 1rem;font-size:0.85rem;border-bottom:1px solid rgba(42,47,66,0.5);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(255,255,255,0.02);}
-.position-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1rem;}
-.pos-1{color:var(--orange)}.pos-2{color:var(--yellow)}.pos-3{color:var(--teal)}
-.joined-time{color:var(--text-muted);font-size:0.78rem;}
-.notif-badge{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.72rem;padding:2px 8px;border-radius:50px;font-weight:600;}
-.nb-email{background:var(--teal-dim);color:var(--teal)}.nb-none{background:var(--surface2);color:var(--text-muted)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity 0.2s;backdrop-filter:blur(4px);}
-.modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;transform:scale(0.95);transition:transform 0.2s;}
-.modal-overlay.open .modal{transform:scale(1);}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
-.modal-header h2{font-size:1.1rem;font-weight:700;}
-.modal-close{width:32px;height:32px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;color:var(--text-muted);}
-.modal-close:hover{background:var(--border);color:var(--text);}
-.form-group{margin-bottom:1.2rem;}
-label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-dim);margin-bottom:0.4rem;}
-input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem;font-family:'Sora',sans-serif;font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.15s,box-shadow 0.15s;}
-input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,0.15);}
-textarea{resize:vertical;min-height:80px;}
-select option{background:var(--surface2);}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
-.qr-preview{background:var(--surface2);border:2px dashed var(--border);border-radius:14px;padding:2rem;text-align:center;margin-top:0.5rem;}
-.qr-box{width:100px;height:100px;background:#fff;border-radius:8px;margin:0 auto 0.75rem;display:flex;align-items:center;justify-content:center;font-size:3.5rem;}
-.qr-preview p{font-size:0.8rem;color:var(--text-muted);}
-.qr-preview strong{font-size:0.85rem;font-family:'JetBrains Mono',monospace;color:var(--orange);}
-.toast-container{position:fixed;bottom:2rem;right:2rem;display:flex;flex-direction:column;gap:0.5rem;z-index:200;}
-.toast{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0.85rem 1.2rem;display:flex;align-items:center;gap:0.6rem;font-size:0.85rem;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,0.3);animation:toastIn 0.3s ease;min-width:260px;}
-@keyframes toastIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
-.toast.success{border-left:3px solid var(--teal)}.toast.warning{border-left:3px solid var(--yellow)}.toast.error{border-left:3px solid var(--red)}
-.analytics-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.2rem;margin-bottom:1.5rem;}
-.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem;}
-.chart-card h3{font-size:0.9rem;font-weight:700;margin-bottom:1.2rem;color:var(--text-dim);}
-.bar-chart{display:flex;align-items:flex-end;gap:0.5rem;height:120px;}
-.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.3rem;}
-.bar{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--orange),rgba(255,107,53,0.4));transition:height 0.8s cubic-bezier(0.34,1.56,0.64,1);min-height:4px;}
-.bar:hover{background:linear-gradient(180deg,var(--yellow),rgba(255,210,63,0.4));}
-.bar-label{font-size:0.65rem;color:var(--text-muted);font-weight:600;}
-.donut-wrap{display:flex;flex-direction:column;align-items:center;padding:1rem;}
-.donut{width:100px;height:100px;position:relative;margin-bottom:1rem;}
-.donut svg{transform:rotate(-90deg);}
-.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.donut-val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;}
-.donut-sub{font-size:0.65rem;color:var(--text-muted);}
-.legend{display:flex;flex-direction:column;gap:0.5rem;width:100%;}
-.legend-item{display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.empty-state{text-align:center;padding:3rem 2rem;color:var(--text-muted);}
-.empty-state .es-icon{font-size:3rem;margin-bottom:1rem;}
-.empty-state h3{font-size:1rem;font-weight:700;color:var(--text-dim);margin-bottom:0.5rem;}
-.empty-state p{font-size:0.85rem;line-height:1.6;}
-.detail-header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;}
-.back-btn{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
-.back-btn:hover{background:var(--border);}
-.detail-info{flex:1;}
-.detail-info h1{font-size:1.3rem;font-weight:800;}
-.detail-info p{font-size:0.82rem;color:var(--text-muted);margin-top:0.2rem;}
-.detail-actions{display:flex;gap:0.5rem;}
-.live-badge{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.72rem;font-weight:700;background:var(--teal-dim);color:var(--teal);padding:3px 10px;border-radius:50px;}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:livePulse 1.5s ease-in-out infinite;}
-@keyframes livePulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
-.settings-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;}
-.settings-card h3{font-size:0.95rem;font-weight:700;margin-bottom:1.2rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid rgba(42,47,66,0.5);}
-.toggle-row:last-of-type{border-bottom:none;}
-.toggle-label{font-size:0.85rem;font-weight:500;}
-.toggle-sub{font-size:0.72rem;color:var(--text-muted);margin-top:0.15rem;}
-.toggle{width:40px;height:22px;border-radius:11px;background:var(--surface2);border:1px solid var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
-.toggle.on{background:var(--teal);}
-.toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform 0.2s;}
-.toggle.on::after{transform:translateX(18px);}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-@media(max-width:900px){
-  .sidebar{width:60px;}
-  .sidebar-logo span,.nav-item>span:not(.nav-icon),.nav-section-label,.user-info{display:none;}
-  .sidebar-logo{justify-content:center;padding:0 0 1.5rem;}
-  .nav-item{padding:0.75rem;justify-content:center;}
-  .main{margin-left:60px;}
-  .stats-row{grid-template-columns:1fr 1fr;}
-  .analytics-grid,.settings-grid{grid-template-columns:1fr;}
-  .form-row{grid-template-columns:1fr;}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QueueZap – Admin Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0F1117;
+      --surface: #181C27;
+      --surface2: #1F2435;
+      --border: #2A2F42;
+      --orange: #FF6B35;
+      --orange-dim: rgba(255, 107, 53, 0.12);
+      --teal: #0EAD97;
+      --teal-dim: rgba(14, 173, 151, 0.12);
+      --yellow: #FFD23F;
+      --yellow-dim: rgba(255, 210, 63, 0.12);
+      --red: #FF4D6D;
+      --red-dim: rgba(255, 77, 109, 0.12);
+      --text: #E8EAF0;
+      --text-muted: #6B7490;
+      --text-dim: #9AA0B8;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 50;
+    }
+
+    .sidebar-logo {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sidebar-logo span {
+      background: var(--orange);
+      color: #fff;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 1rem;
+    }
+
+    .sidebar-nav {
+      padding: 1.2rem 0;
+      flex: 1;
+    }
+
+    .nav-section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 0.5rem 1.5rem 0.3rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-item.active {
+      color: var(--orange);
+      background: var(--orange-dim);
+      border-left-color: var(--orange);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--orange);
+      color: #fff;
+      border-radius: 50px;
+      padding: 1px 7px;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .sidebar-user {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--yellow));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .user-role {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .topbar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .notif-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      position: relative;
+    }
+
+    .notif-btn:hover {
+      background: var(--border);
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orange);
+      border: 1.5px solid var(--surface);
+    }
+
+    .page {
+      display: none;
+      padding: 2rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem 1.4rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--orange);
+      transform: translateY(-2px);
+    }
+
+    .stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+
+    .stat-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .si-orange {
+      background: var(--orange-dim)
+    }
+
+    .si-teal {
+      background: var(--teal-dim)
+    }
+
+    .si-yellow {
+      background: var(--yellow-dim)
+    }
+
+    .si-red {
+      background: var(--red-dim)
+    }
+
+    .stat-change {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 50px;
+    }
+
+    .up {
+      background: rgba(14, 173, 151, 0.15);
+      color: var(--teal)
+    }
+
+    .down {
+      background: var(--red-dim);
+      color: var(--red)
+    }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      font-weight: 500;
+    }
+
+    .section-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-hdr h2 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      font-family: 'Sora', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-orange {
+      background: var(--orange);
+      color: #fff
+    }
+
+    .btn-orange:hover {
+      background: #e85a27;
+      transform: translateY(-1px)
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text-dim);
+      border: 1px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      background: var(--border);
+      color: var(--text)
+    }
+
+    .btn-danger {
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(255, 77, 109, 0.2)
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 77, 109, 0.2)
+    }
+
+    .btn-teal {
+      background: var(--teal-dim);
+      color: var(--teal);
+      border: 1px solid rgba(14, 173, 151, 0.2)
+    }
+
+    .btn-teal:hover {
+      background: rgba(14, 173, 151, 0.2)
+    }
+
+    .btn-sm {
+      padding: 0.3rem 0.75rem;
+      font-size: 0.78rem;
+    }
+
+    .queues-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .queue-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.4rem;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .queue-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+    }
+
+    .queue-card:hover {
+      border-color: var(--orange);
+      transform: translateY(-3px);
+    }
+
+    .queue-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .queue-card-info h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .queue-card-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .status-pill {
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-active {
+      background: var(--teal-dim);
+      color: var(--teal)
+    }
+
+    .status-paused {
+      background: var(--yellow-dim);
+      color: var(--yellow)
+    }
+
+    .status-closed {
+      background: var(--red-dim);
+      color: var(--red)
+    }
+
+    .queue-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .queue-progress {
+      background: var(--surface2);
+      border-radius: 50px;
+      height: 6px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .queue-progress-bar {
+      height: 100%;
+      border-radius: 50px;
+      background: linear-gradient(90deg, var(--orange), var(--yellow));
+      transition: width 0.5s ease;
+    }
+
+    .queue-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--surface2);
+    }
+
+    th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(42, 47, 66, 0.5);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .position-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .pos-1 {
+      color: var(--orange)
+    }
+
+    .pos-2 {
+      color: var(--yellow)
+    }
+
+    .pos-3 {
+      color: var(--teal)
+    }
+
+    .joined-time {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .notif-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 50px;
+      font-weight: 600;
+    }
+
+    .nb-email {
+      background: var(--teal-dim);
+      color: var(--teal)
+    }
+
+    .nb-none {
+      background: var(--surface2);
+      color: var(--text-muted)
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.open .modal {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .modal-close:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      font-family: 'Sora', sans-serif;
+      font-size: 0.88rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    select option {
+      background: var(--surface2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .qr-preview {
+      background: var(--surface2);
+      border: 2px dashed var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .qr-box {
+      width: 100px;
+      height: 100px;
+      background: #fff;
+      border-radius: 8px;
+      margin: 0 auto 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+
+    .qr-preview p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .qr-preview strong {
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--orange);
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 200;
+    }
+
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      animation: toastIn 0.3s ease;
+      min-width: 260px;
+    }
+
+    @keyframes toastIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      border-left: 3px solid var(--teal)
+    }
+
+    .toast.warning {
+      border-left: 3px solid var(--yellow)
+    }
+
+    .toast.error {
+      border-left: 3px solid var(--red)
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem;
+    }
+
+    .chart-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      color: var(--text-dim);
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+      height: 120px;
+    }
+
+    .bar-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      background: linear-gradient(180deg, var(--orange), rgba(255, 107, 53, 0.4));
+      transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-height: 4px;
+    }
+
+    .bar:hover {
+      background: linear-gradient(180deg, var(--yellow), rgba(255, 210, 63, 0.4));
+    }
+
+    .bar-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .donut-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .donut {
+      width: 100px;
+      height: 100px;
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .donut svg {
+      transform: rotate(-90deg);
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .donut-sub {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state .es-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .back-btn:hover {
+      background: var(--border);
+    }
+
+    .detail-info {
+      flex: 1;
+    }
+
+    .detail-info h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .detail-info p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--teal-dim);
+      color: var(--teal);
+      padding: 3px 10px;
+      border-radius: 50px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: livePulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .settings-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .settings-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(42, 47, 66, 0.5);
+    }
+
+    .toggle-row:last-of-type {
+      border-bottom: none;
+    }
+
+    .toggle-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .toggle-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .toggle {
+      width: 40px;
+      height: 22px;
+      border-radius: 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle.on {
+      background: var(--teal);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+    }
+
+    .toggle.on::after {
+      transform: translateX(18px);
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    @media(max-width:900px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .sidebar-logo span,
+      .nav-item>span:not(.nav-icon),
+      .nav-section-label,
+      .user-info {
+        display: none;
+      }
+
+      .sidebar-logo {
+        justify-content: center;
+        padding: 0 0 1.5rem;
+      }
+
+      .nav-item {
+        padding: 0.75rem;
+        justify-content: center;
+      }
+
+      .main {
+        margin-left: 60px;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .analytics-grid,
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<aside class="sidebar">
-  <div class="sidebar-logo">Queue<span>Zap</span> ⚡</div>
-  <nav class="sidebar-nav">
-    <div class="nav-section-label">Main</div>
-    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">🏠</span><span>Dashboard</span></div>
-    <div class="nav-item" onclick="showPage('queues',this)"><span class="nav-icon">📋</span><span>My Queues</span><span class="nav-badge" id="queue-count-badge">3</span></div>
-    <div class="nav-item" onclick="showPage('analytics',this)"><span class="nav-icon">📊</span><span>Analytics</span></div>
-    <div class="nav-section-label">Account</div>
-    <div class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span><span>Settings</span></div>
-  </nav>
-  <div class="sidebar-user" title="Click to logout" onclick="logout()" style="cursor:pointer;">
-    <div class="user-avatar">DR</div>
-    <div class="user-info">
-      <div class="user-name">Dr. Raj Sharma</div>
-      <div class="user-role">Admin · Logout →</div>
-    </div>
-  </div>
-</aside>
-
-<main class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="topbar-title">Dashboard</div>
-    <div class="topbar-right">
-      <div class="notif-btn" onclick="showToast('2 new entries in Morning OPD','warning')">🔔<div class="notif-dot"></div></div>
-      <button class="btn btn-orange" onclick="openModal()">+ Create Queue</button>
-    </div>
-  </div>
-
-  <!-- DASHBOARD -->
-  <div class="page active" id="page-dashboard">
-    <div style="padding:0 0 1.5rem;">
-      <h1 style="font-size:1.4rem;font-weight:800;">Good morning, Dr. Sharma 👋</h1>
-      <p style="color:var(--text-muted);font-size:0.88rem;margin-top:0.3rem;">Here's what's happening across your queues today.</p>
-    </div>
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon si-orange">📋</div><span class="stat-change up">↑ 2</span></div><div class="stat-val" id="active-count">3</div><div class="stat-label">Active Queues</div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon si-teal">👥</div><span class="stat-change up">↑ 5</span></div><div class="stat-val" id="total-waiting">12</div><div class="stat-label">People Waiting</div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon si-yellow">✅</div><span class="stat-change up">↑ 8</span></div><div class="stat-val">28</div><div class="stat-label">Served Today</div></div>
-      <div class="stat-card"><div class="stat-top"><div class="stat-icon si-red">⏱️</div><span class="stat-change down">↑ 3m</span></div><div class="stat-val">14<span style="font-size:1rem;">m</span></div><div class="stat-label">Avg Wait Time</div></div>
-    </div>
-    <div class="section-hdr">
-      <h2>🔴 Live Queues</h2>
-      <button class="btn btn-ghost btn-sm" onclick="showPage('queues',document.querySelectorAll('.nav-item')[1])">View all →</button>
-    </div>
-    <div class="queues-grid" id="dashboard-queues"></div>
-  </div>
-
-  <!-- QUEUES -->
-  <div class="page" id="page-queues">
-    <div class="section-hdr" style="margin-bottom:1.5rem;">
-      <div><h1 style="font-size:1.3rem;font-weight:800;">My Queues</h1><p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem;">Manage all your queues</p></div>
-      <button class="btn btn-orange" onclick="openModal()">+ Create Queue</button>
-    </div>
-    <div class="queues-grid" id="all-queues"></div>
-  </div>
-
-  <!-- DETAIL -->
-  <div class="page" id="page-detail">
-    <div class="detail-header">
-      <div class="back-btn" onclick="showPage('queues',document.querySelectorAll('.nav-item')[1])">←</div>
-      <div class="detail-info">
-        <div style="display:flex;align-items:center;gap:0.7rem;">
-          <h1 id="detail-name">Queue</h1>
-          <span class="live-badge"><span class="live-dot"></span>Live</span>
-        </div>
-        <p id="detail-meta"></p>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Queue<span>Zap</span> ⚡</div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><span
+          class="nav-icon">🏠</span><span>Dashboard</span></div>
+      <div class="nav-item" onclick="showPage('queues',this)"><span class="nav-icon">📋</span><span>My
+          Queues</span><span class="nav-badge" id="queue-count-badge">3</span></div>
+      <div class="nav-item" onclick="showPage('analytics',this)"><span class="nav-icon">📊</span><span>Analytics</span>
       </div>
-      <div class="detail-actions">
-        <button class="btn btn-ghost btn-sm" onclick="showQR()">▦ Show QR</button>
-        <button class="btn btn-danger btn-sm" onclick="clearQueue()">Clear All</button>
+      <div class="nav-section-label">Account</div>
+      <div class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span><span>Settings</span>
+      </div>
+    </nav>
+    <div class="sidebar-user" title="Click to logout" onclick="logout()" style="cursor:pointer;">
+      <div class="user-avatar">DR</div>
+      <div class="user-info">
+        <div class="user-name">Dr. Raj Sharma</div>
+        <div class="user-role">Admin · Logout →</div>
       </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>Name</th><th>Joined</th><th>Notification</th><th>Action</th></tr></thead>
-        <tbody id="detail-tbody"></tbody>
-      </table>
-    </div>
-  </div>
+  </aside>
 
-  <!-- ANALYTICS -->
-  <div class="page" id="page-analytics">
-    <div style="margin-bottom:1.5rem;"><h1 style="font-size:1.3rem;font-weight:800;">Analytics</h1><p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem;">Queue performance over the last 7 days</p></div>
-    <div class="analytics-grid">
-      <div class="chart-card"><h3>Daily Queue Entries</h3><div class="bar-chart" id="bar-chart"></div></div>
-      <div class="chart-card"><h3>Queue Types</h3>
-        <div class="donut-wrap">
-          <div class="donut">
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#1F2435" stroke-width="14"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#FF6B35" stroke-width="14" stroke-dasharray="95 144" stroke-dashoffset="0"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#0EAD97" stroke-width="14" stroke-dasharray="55 184" stroke-dashoffset="-95"/>
-              <circle cx="50" cy="50" r="38" fill="none" stroke="#FFD23F" stroke-width="14" stroke-dasharray="39 200" stroke-dashoffset="-150"/>
-            </svg>
-            <div class="donut-center"><span class="donut-val">40</span><span class="donut-sub">total</span></div>
-          </div>
-          <div class="legend">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Clinic (40%)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Interviews (30%)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Other (30%)</div>
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-right">
+        <div class="notif-btn" onclick="showToast('2 new entries in Morning OPD','warning')">🔔<div class="notif-dot">
           </div>
         </div>
+        <button class="btn btn-orange" onclick="openModal()">+ Create Queue</button>
       </div>
     </div>
-    <div class="chart-card"><h3>Busiest Hours Today</h3><div class="bar-chart" id="hours-chart" style="height:80px;"></div></div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div style="padding:0 0 1.5rem;">
+        <h1 style="font-size:1.4rem;font-weight:800;">Good morning, Dr. Sharma 👋</h1>
+        <p style="color:var(--text-muted);font-size:0.88rem;margin-top:0.3rem;">Here's what's happening across your
+          queues today.</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-orange">📋</div><span class="stat-change up">↑ 2</span>
+          </div>
+          <div class="stat-val" id="active-count">3</div>
+          <div class="stat-label">Active Queues</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-teal">👥</div><span class="stat-change up">↑ 5</span>
+          </div>
+          <div class="stat-val" id="total-waiting">12</div>
+          <div class="stat-label">People Waiting</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-yellow">✅</div><span class="stat-change up">↑ 8</span>
+          </div>
+          <div class="stat-val">28</div>
+          <div class="stat-label">Served Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-red">⏱️</div><span class="stat-change down">↑ 3m</span>
+          </div>
+          <div class="stat-val">14<span style="font-size:1rem;">m</span></div>
+          <div class="stat-label">Avg Wait Time</div>
+        </div>
+      </div>
+      <div class="section-hdr">
+        <h2>🔴 Live Queues</h2>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('queues',document.querySelectorAll('.nav-item')[1])">View
+          all →</button>
+      </div>
+      <div class="queues-grid" id="dashboard-queues"></div>
+    </div>
+
+    <!-- QUEUES -->
+    <div class="page" id="page-queues">
+      <div class="section-hdr" style="margin-bottom:1.5rem;">
+        <div>
+          <h1 style="font-size:1.3rem;font-weight:800;">My Queues</h1>
+          <p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem;">Manage all your queues</p>
+        </div>
+        <button class="btn btn-orange" onclick="openModal()">+ Create Queue</button>
+      </div>
+      <div class="queues-grid" id="all-queues"></div>
+    </div>
+
+    <!-- DETAIL -->
+    <div class="page" id="page-detail">
+      <div class="detail-header">
+        <div class="back-btn" onclick="showPage('queues',document.querySelectorAll('.nav-item')[1])">←</div>
+        <div class="detail-info">
+          <div style="display:flex;align-items:center;gap:0.7rem;">
+            <h1 id="detail-name">Queue</h1>
+            <span class="live-badge"><span class="live-dot"></span>Live</span>
+          </div>
+          <p id="detail-meta"></p>
+        </div>
+        <div class="detail-actions">
+          <button class="btn btn-ghost btn-sm" onclick="showQR()">▦ Show QR</button>
+          <button class="btn btn-danger btn-sm" onclick="clearQueue()">Clear All</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Joined</th>
+              <th>Notification</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="page" id="page-analytics">
+      <div style="margin-bottom:1.5rem;">
+        <h1 style="font-size:1.3rem;font-weight:800;">Analytics</h1>
+        <p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem;">Queue performance over the last 7 days
+        </p>
+      </div>
+      <div class="analytics-grid">
+        <div class="chart-card">
+          <h3>Daily Queue Entries</h3>
+          <div class="bar-chart" id="bar-chart"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Queue Types</h3>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#1F2435" stroke-width="14" />
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#FF6B35" stroke-width="14" stroke-dasharray="95 144"
+                  stroke-dashoffset="0" />
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#0EAD97" stroke-width="14" stroke-dasharray="55 184"
+                  stroke-dashoffset="-95" />
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#FFD23F" stroke-width="14" stroke-dasharray="39 200"
+                  stroke-dashoffset="-150" />
+              </svg>
+              <div class="donut-center"><span class="donut-val">40</span><span class="donut-sub">total</span></div>
+            </div>
+            <div class="legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--orange)"></div>Clinic (40%)
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--teal)"></div>Interviews (30%)
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--yellow)"></div>Other (30%)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Busiest Hours Today</h3>
+        <div class="bar-chart" id="hours-chart" style="height:80px;"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div style="margin-bottom:1.5rem;">
+        <h1 style="font-size:1.3rem;font-weight:800;">Settings</h1>
+        <p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem;">Manage your account preferences</p>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>👤 Profile</h3>
+          <div class="form-group"><label>Full Name</label><input value="Dr. Raj Sharma" /></div>
+          <div class="form-group"><label>Email</label><input value="raj.sharma@clinic.com" /></div>
+          <div class="form-group"><label>Organisation</label><input value="Sharma Multispeciality Clinic" /></div>
+          <button class="btn btn-orange" onclick="showToast('Profile saved!','success')">Save Changes</button>
+        </div>
+        <div class="settings-card">
+          <h3>🔔 Notifications</h3>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Email notifications</div>
+              <div class="toggle-sub">Notify users via email</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Push notifications</div>
+              <div class="toggle-sub">Browser push alerts</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Alert when 2 ahead</div>
+              <div class="toggle-sub">Notify users 2 positions before</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Daily summary</div>
+              <div class="toggle-sub">End-of-day queue stats email</div>
+            </div>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>📍 Location</h3>
+          <div class="form-group"><label>Default radius (meters)</label><input type="number" value="100" /></div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Strict location check</div>
+              <div class="toggle-sub">Reject if outside radius</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <button class="btn btn-ghost" style="margin-top:1rem;"
+            onclick="showToast('Location settings saved','success')">Save</button>
+        </div>
+        <div class="settings-card">
+          <h3>⚠️ Danger Zone</h3>
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6;">These actions are
+            irreversible.</p>
+          <button class="btn btn-danger" style="width:100%;margin-bottom:0.75rem;"
+            onclick="showToast('All queues cleared','error')">🗑️ Clear All Queues</button>
+          <button class="btn btn-danger" style="width:100%;background:transparent;"
+            onclick="showToast('Deletion requested','error')">❌ Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- CREATE MODAL -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>⚡ Create New Queue</h2>
+        <div class="modal-close" onclick="closeModal()">✕</div>
+      </div>
+      <div class="form-group"><label>Queue Name *</label><input id="q-name"
+          placeholder="e.g. Morning OPD, Round 1 Interviews" /></div>
+      <div class="form-group"><label>Category</label>
+        <select id="q-category">
+          <option value="🏥">🏥 Doctor / Clinic</option>
+          <option value="💼">💼 Interview</option>
+          <option value="🏦">🏦 Bank / Finance</option>
+          <option value="🍽️">🍽️ Restaurant</option>
+          <option value="🏛️">🏛️ Government Office</option>
+          <option value="🎓">🎓 Education</option>
+          <option value="📦">📦 Other</option>
+        </select>
+      </div>
+      <!-- Demo mode toggle -->
+      <div class="form-group">
+        <div
+          style="display:flex;align-items:center;justify-content:space-between;background:var(--yellow-dim);border:1px solid rgba(255,210,63,0.3);border-radius:10px;padding:0.75rem 1rem;">
+          <div>
+            <div style="font-size:0.82rem;font-weight:700;">🧪 Demo Mode</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.1rem;">Skip location check — anyone can
+              join</div>
+          </div>
+          <div class="toggle on" id="demo-toggle" onclick="toggleDemoMode()"></div>
+        </div>
+      </div>
+      <!-- Location fields (hidden in demo mode) -->
+      <div id="location-fields" style="display:none;">
+        <div class="form-row">
+          <div class="form-group"><label>Latitude *</label><input id="q-lat" placeholder="e.g. 28.6139" type="number"
+              step="any" /></div>
+          <div class="form-group"><label>Longitude *</label><input id="q-lng" placeholder="e.g. 77.2090" type="number"
+              step="any" /></div>
+        </div>
+        <div class="form-group"><label>Location Radius (meters)</label><input id="q-radius" type="number" value="100"
+            min="10" max="1000" /></div>
+      </div>
+      <div class="form-group"><label>Description (optional)</label><textarea id="q-desc"
+          placeholder="Any info for people joining..."></textarea></div>
+      <div class="form-group"><label>QR Code Preview</label>
+        <div class="qr-preview">
+          <div class="qr-box">▦</div>
+          <p>Your unique QR code will appear here</p><strong id="qr-url">queuezap.app/q/••••••</strong>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-orange" onclick="createQueue()">Create Queue ⚡</button>
+      </div>
+    </div>
   </div>
 
-  <!-- SETTINGS -->
-  <div class="page" id="page-settings">
-    <div style="margin-bottom:1.5rem;"><h1 style="font-size:1.3rem;font-weight:800;">Settings</h1><p style="color:var(--text-muted);font-size:0.82rem;margin-top:0.2rem;">Manage your account preferences</p></div>
-    <div class="settings-grid">
-      <div class="settings-card">
-        <h3>👤 Profile</h3>
-        <div class="form-group"><label>Full Name</label><input value="Dr. Raj Sharma"/></div>
-        <div class="form-group"><label>Email</label><input value="raj.sharma@clinic.com"/></div>
-        <div class="form-group"><label>Organisation</label><input value="Sharma Multispeciality Clinic"/></div>
-        <button class="btn btn-orange" onclick="showToast('Profile saved!','success')">Save Changes</button>
+  <!-- QR MODAL -->
+  <div class="modal-overlay" id="qr-modal">
+    <div class="modal" style="max-width:360px;text-align:center;">
+      <div class="modal-header">
+        <h2>📱 Queue QR Code</h2>
+        <div class="modal-close" onclick="document.getElementById('qr-modal').classList.remove('open')">✕</div>
       </div>
-      <div class="settings-card">
-        <h3>🔔 Notifications</h3>
-        <div class="toggle-row"><div><div class="toggle-label">Email notifications</div><div class="toggle-sub">Notify users via email</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="toggle-row"><div><div class="toggle-label">Push notifications</div><div class="toggle-sub">Browser push alerts</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="toggle-row"><div><div class="toggle-label">Alert when 2 ahead</div><div class="toggle-sub">Notify users 2 positions before</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="toggle-row"><div><div class="toggle-label">Daily summary</div><div class="toggle-sub">End-of-day queue stats email</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+      <div style="background:var(--surface2);border-radius:16px;padding:2rem;margin-bottom:1.2rem;">
+        <div
+          style="width:160px;height:160px;background:#fff;border-radius:12px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:6rem;">
+          ▦</div>
       </div>
-      <div class="settings-card">
-        <h3>📍 Location</h3>
-        <div class="form-group"><label>Default radius (meters)</label><input type="number" value="100"/></div>
-        <div class="toggle-row"><div><div class="toggle-label">Strict location check</div><div class="toggle-sub">Reject if outside radius</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <button class="btn btn-ghost" style="margin-top:1rem;" onclick="showToast('Location settings saved','success')">Save</button>
-      </div>
-      <div class="settings-card">
-        <h3>⚠️ Danger Zone</h3>
-        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.6;">These actions are irreversible.</p>
-        <button class="btn btn-danger" style="width:100%;margin-bottom:0.75rem;" onclick="showToast('All queues cleared','error')">🗑️ Clear All Queues</button>
-        <button class="btn btn-danger" style="width:100%;background:transparent;" onclick="showToast('Deletion requested','error')">❌ Delete Account</button>
+      <p id="qr-modal-url"
+        style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--orange);margin-bottom:0.5rem;"></p>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.5rem;">Display at your venue. Users scan to
+        join instantly.</p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;">
+        <button class="btn btn-ghost" onclick="showToast('Link copied!','success')">📋 Copy Link</button>
+        <button class="btn btn-orange" onclick="showToast('QR downloaded!','success')">⬇️ Download QR</button>
       </div>
     </div>
   </div>
-</main>
 
-<!-- CREATE MODAL -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-header"><h2>⚡ Create New Queue</h2><div class="modal-close" onclick="closeModal()">✕</div></div>
-    <div class="form-group"><label>Queue Name *</label><input id="q-name" placeholder="e.g. Morning OPD, Round 1 Interviews"/></div>
-    <div class="form-group"><label>Category</label>
-      <select id="q-category">
-        <option value="🏥">🏥 Doctor / Clinic</option>
-        <option value="💼">💼 Interview</option>
-        <option value="🏦">🏦 Bank / Finance</option>
-        <option value="🍽️">🍽️ Restaurant</option>
-        <option value="🏛️">🏛️ Government Office</option>
-        <option value="🎓">🎓 Education</option>
-        <option value="📦">📦 Other</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Latitude *</label><input id="q-lat" placeholder="e.g. 28.6139" type="number" step="any"/></div>
-      <div class="form-group"><label>Longitude *</label><input id="q-lng" placeholder="e.g. 77.2090" type="number" step="any"/></div>
-    </div>
-    <div class="form-group"><label>Location Radius (meters)</label><input id="q-radius" type="number" value="100" min="10" max="1000"/></div>
-    <div class="form-group"><label>Description (optional)</label><textarea id="q-desc" placeholder="Any info for people joining..."></textarea></div>
-    <div class="form-group"><label>QR Code Preview</label>
-      <div class="qr-preview"><div class="qr-box">▦</div><p>Your unique QR code will appear here</p><strong id="qr-url">queuezap.app/q/••••••</strong></div>
-    </div>
-    <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-orange" onclick="createQueue()">Create Queue ⚡</button>
-    </div>
-  </div>
-</div>
+  <div class="toast-container" id="toasts"></div>
 
-<!-- QR MODAL -->
-<div class="modal-overlay" id="qr-modal">
-  <div class="modal" style="max-width:360px;text-align:center;">
-    <div class="modal-header"><h2>📱 Queue QR Code</h2><div class="modal-close" onclick="document.getElementById('qr-modal').classList.remove('open')">✕</div></div>
-    <div style="background:var(--surface2);border-radius:16px;padding:2rem;margin-bottom:1.2rem;"><div style="width:160px;height:160px;background:#fff;border-radius:12px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:6rem;">▦</div></div>
-    <p id="qr-modal-url" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--orange);margin-bottom:0.5rem;"></p>
-    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.5rem;">Display at your venue. Users scan to join instantly.</p>
-    <div style="display:flex;gap:0.75rem;justify-content:center;">
-      <button class="btn btn-ghost" onclick="showToast('Link copied!','success')">📋 Copy Link</button>
-      <button class="btn btn-orange" onclick="showToast('QR downloaded!','success')">⬇️ Download QR</button>
-    </div>
-  </div>
-</div>
+  <script>
+    // ── CONFIG — update this after Vercel deploy ──────────────────────────────────
+    const API = window.location.origin; // same domain since frontend + API are on Vercel
+    const TOKEN = sessionStorage.getItem('queuezap_token') || 'admin-token-phase1';
 
-<div class="toast-container" id="toasts"></div>
+    // ── AUTH GUARD ────────────────────────────────────────────────────────────────
+    if (sessionStorage.getItem('queuezap_auth') !== 'true') {
+      window.location.href = '/login';
+    }
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = '/login';
+    }
 
-<script>
-// ── CONFIG — update this after Vercel deploy ──────────────────────────────────
-const API    = window.location.origin; // same domain since frontend + API are on Vercel
-const TOKEN  = sessionStorage.getItem('queuezap_token') || 'admin-token-phase1';
+    // ── API HELPER ────────────────────────────────────────────────────────────────
+    async function api(path, options = {}) {
+      const res = await fetch(`${API}${path}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${TOKEN}`,
+          ...(options.headers || {}),
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Request failed: ${res.status}`);
+      }
+      return res.json();
+    }
 
-// ── AUTH GUARD ────────────────────────────────────────────────────────────────
-if (sessionStorage.getItem('queuezap_auth') !== 'true') {
-  window.location.href = '/login';
-}
-function logout() {
-  sessionStorage.clear();
-  window.location.href = '/login';
-}
+    // ── STATE ─────────────────────────────────────────────────────────────────────
+    let queues = [];
+    let currentDetailId = null;
+    let currentDetailEntries = [];
 
-// ── API HELPER ────────────────────────────────────────────────────────────────
-async function api(path, options = {}) {
-  const res = await fetch(`${API}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${TOKEN}`,
-      ...(options.headers || {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Request failed: ${res.status}`);
-  }
-  return res.json();
-}
+    // ── NAVIGATION ────────────────────────────────────────────────────────────────
+    function showPage(id, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      if (el) el.classList.add('active');
+      const titles = { dashboard: 'Dashboard', queues: 'My Queues', detail: 'Queue Detail', analytics: 'Analytics', settings: 'Settings' };
+      document.getElementById('topbar-title').textContent = titles[id] || id;
+      if (id === 'dashboard') loadDashboard();
+      if (id === 'queues') loadQueues();
+      if (id === 'analytics') renderAnalytics();
+    }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let queues = [];
-let currentDetailId = null;
-let currentDetailEntries = [];
-
-// ── NAVIGATION ────────────────────────────────────────────────────────────────
-function showPage(id, el) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  if(el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',queues:'My Queues',detail:'Queue Detail',analytics:'Analytics',settings:'Settings'};
-  document.getElementById('topbar-title').textContent=titles[id]||id;
-  if(id==='dashboard') loadDashboard();
-  if(id==='queues') loadQueues();
-  if(id==='analytics') renderAnalytics();
-}
-
-// ── RENDER QUEUE CARD ─────────────────────────────────────────────────────────
-function renderQueueCard(q, container) {
-  const count = q.waitingCount || 0;
-  const pct   = Math.min(100,(count/10)*100);
-  const card  = document.createElement('div');
-  card.className='queue-card';
-  card.innerHTML=`
+    // ── RENDER QUEUE CARD ─────────────────────────────────────────────────────────
+    function renderQueueCard(q, container) {
+      const count = q.waitingCount || 0;
+      const pct = Math.min(100, (count / 10) * 100);
+      const card = document.createElement('div');
+      card.className = 'queue-card';
+      card.innerHTML = `
     <div class="queue-card-top">
-      <div class="queue-card-info"><h3>${q.category} ${q.name}</h3><p>📍 ${q.description||q.location||''}</p></div>
+      <div class="queue-card-info"><h3>${q.category} ${q.name}</h3><p>📍 ${q.description || q.location || ''}</p></div>
       <span class="status-pill status-${q.status}">${q.status}</span>
     </div>
     <div class="queue-meta">
@@ -424,229 +1537,230 @@ function renderQueueCard(q, container) {
     <div class="queue-progress"><div class="queue-progress-bar" style="width:${pct}%"></div></div>
     <div class="queue-actions">
       <button class="btn btn-teal btn-sm" onclick="openDetail('${q.id}')">Manage →</button>
-      <button class="btn btn-ghost btn-sm" onclick="showQRForQueue('${q.id}','${q.queueUrl||''}')">▦ QR</button>
-      <button class="btn btn-ghost btn-sm" onclick="toggleStatus('${q.id}','${q.status}')">${q.status==='active'?'⏸ Pause':'▶ Resume'}</button>
+      <button class="btn btn-ghost btn-sm" onclick="showQRForQueue('${q.id}','${q.queueUrl || ''}')">▦ QR</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleStatus('${q.id}','${q.status}')">${q.status === 'active' ? '⏸ Pause' : '▶ Resume'}</button>
       <button class="btn btn-danger btn-sm" onclick="deleteQueue('${q.id}','${q.name}')">🗑</button>
     </div>`;
-  container.appendChild(card);
-}
+      container.appendChild(card);
+    }
 
-// ── DASHBOARD ─────────────────────────────────────────────────────────────────
-async function loadDashboard() {
-  const c = document.getElementById('dashboard-queues');
-  c.innerHTML = '<div style="color:var(--text-muted);padding:2rem;text-align:center;">Loading…</div>';
-  try {
-    const data  = await api('/api/queues/list');
-    queues      = data.queues || [];
-    const active = queues.filter(q=>q.status==='active');
-    document.getElementById('active-count').textContent  = active.length;
-    document.getElementById('total-waiting').textContent = queues.reduce((s,q)=>s+(q.waitingCount||0),0);
-    c.innerHTML = '';
-    if(!active.length){c.innerHTML=`<div class="empty-state"><div class="es-icon">📭</div><h3>No active queues</h3><p>Create a queue to get started</p></div>`;return;}
-    active.forEach(q=>renderQueueCard(q,c));
-  } catch(err) {
-    c.innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><h3>Could not load queues</h3><p>${err.message}</p></div>`;
-  }
-}
+    // ── DASHBOARD ─────────────────────────────────────────────────────────────────
+    async function loadDashboard() {
+      const c = document.getElementById('dashboard-queues');
+      c.innerHTML = '<div style="color:var(--text-muted);padding:2rem;text-align:center;">Loading…</div>';
+      try {
+        const data = await api('/api/queues/list');
+        queues = data.queues || [];
+        const active = queues.filter(q => q.status === 'active');
+        document.getElementById('active-count').textContent = active.length;
+        document.getElementById('total-waiting').textContent = queues.reduce((s, q) => s + (q.waitingCount || 0), 0);
+        c.innerHTML = '';
+        if (!active.length) { c.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><h3>No active queues</h3><p>Create a queue to get started</p></div>`; return; }
+        active.forEach(q => renderQueueCard(q, c));
+      } catch (err) {
+        c.innerHTML = `<div class="empty-state"><div class="es-icon">⚠️</div><h3>Could not load queues</h3><p>${err.message}</p></div>`;
+      }
+    }
 
-// ── ALL QUEUES ────────────────────────────────────────────────────────────────
-async function loadQueues() {
-  const c = document.getElementById('all-queues');
-  c.innerHTML = '<div style="color:var(--text-muted);padding:2rem;text-align:center;">Loading…</div>';
-  try {
-    const data = await api('/api/queues/list');
-    queues     = data.queues || [];
-    document.getElementById('queue-count-badge').textContent = queues.length;
-    c.innerHTML = '';
-    if(!queues.length){c.innerHTML=`<div class="empty-state"><div class="es-icon">📭</div><h3>No queues yet</h3><p>Click "Create Queue" to get started</p></div>`;return;}
-    queues.forEach(q=>renderQueueCard(q,c));
-  } catch(err) {
-    c.innerHTML=`<div class="empty-state"><div class="es-icon">⚠️</div><h3>Error</h3><p>${err.message}</p></div>`;
-  }
-}
+    // ── ALL QUEUES ────────────────────────────────────────────────────────────────
+    async function loadQueues() {
+      const c = document.getElementById('all-queues');
+      c.innerHTML = '<div style="color:var(--text-muted);padding:2rem;text-align:center;">Loading…</div>';
+      try {
+        const data = await api('/api/queues/list');
+        queues = data.queues || [];
+        document.getElementById('queue-count-badge').textContent = queues.length;
+        c.innerHTML = '';
+        if (!queues.length) { c.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><h3>No queues yet</h3><p>Click "Create Queue" to get started</p></div>`; return; }
+        queues.forEach(q => renderQueueCard(q, c));
+      } catch (err) {
+        c.innerHTML = `<div class="empty-state"><div class="es-icon">⚠️</div><h3>Error</h3><p>${err.message}</p></div>`;
+      }
+    }
 
-// ── QUEUE DETAIL ──────────────────────────────────────────────────────────────
-async function openDetail(qid) {
-  currentDetailId = qid;
-  const q = queues.find(x=>x.id===qid) || {};
-  document.getElementById('detail-name').textContent = `${q.category||''} ${q.name||'Queue'}`;
-  document.getElementById('detail-meta').textContent = 'Loading entries…';
-  showPage('detail', null);
-  document.getElementById('topbar-title').textContent = q.name || 'Queue';
-  await loadEntries(qid);
-}
+    // ── QUEUE DETAIL ──────────────────────────────────────────────────────────────
+    async function openDetail(qid) {
+      currentDetailId = qid;
+      const q = queues.find(x => x.id === qid) || {};
+      document.getElementById('detail-name').textContent = `${q.category || ''} ${q.name || 'Queue'}`;
+      document.getElementById('detail-meta').textContent = 'Loading entries…';
+      showPage('detail', null);
+      document.getElementById('topbar-title').textContent = q.name || 'Queue';
+      await loadEntries(qid);
+    }
 
-async function loadEntries(qid) {
-  try {
-    const data = await api(`/api/queues/${qid}/entries`);
-    currentDetailEntries = data.entries || [];
-    document.getElementById('detail-meta').textContent = `${currentDetailEntries.length} waiting`;
-    renderDetailTable(currentDetailEntries);
-  } catch(err) {
-    showToast('Failed to load entries: ' + err.message, 'error');
-  }
-}
+    async function loadEntries(qid) {
+      try {
+        const data = await api(`/api/queues/${qid}/entries`);
+        currentDetailEntries = data.entries || [];
+        document.getElementById('detail-meta').textContent = `${currentDetailEntries.length} waiting`;
+        renderDetailTable(currentDetailEntries);
+      } catch (err) {
+        showToast('Failed to load entries: ' + err.message, 'error');
+      }
+    }
 
-function renderDetailTable(entries) {
-  const tbody = document.getElementById('detail-tbody');
-  tbody.innerHTML = '';
-  if(!entries.length){
-    tbody.innerHTML=`<tr><td colspan="5"><div class="empty-state" style="padding:2rem;"><div class="es-icon">👥</div><h3>Queue is empty</h3><p>Share the QR so people can join</p></div></td></tr>`;
-    return;
-  }
-  entries.forEach((e,i)=>{
-    const pc = i===0?'pos-1':i===1?'pos-2':i===2?'pos-3':'';
-    const nb = e.email
-      ? `<span class="notif-badge nb-email">✉️ ${e.email}</span>`
-      : `<span class="notif-badge nb-none">No notification</span>`;
-    const time = new Date(e.joinedAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-    const tr = document.createElement('tr');
-    tr.innerHTML=`
-      <td><span class="position-num ${pc}">${i+1}</span></td>
+    function renderDetailTable(entries) {
+      const tbody = document.getElementById('detail-tbody');
+      tbody.innerHTML = '';
+      if (!entries.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state" style="padding:2rem;"><div class="es-icon">👥</div><h3>Queue is empty</h3><p>Share the QR so people can join</p></div></td></tr>`;
+        return;
+      }
+      entries.forEach((e, i) => {
+        const pc = i === 0 ? 'pos-1' : i === 1 ? 'pos-2' : i === 2 ? 'pos-3' : '';
+        const nb = e.email
+          ? `<span class="notif-badge nb-email">✉️ ${e.email}</span>`
+          : `<span class="notif-badge nb-none">No notification</span>`;
+        const time = new Date(e.joinedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+      <td><span class="position-num ${pc}">${i + 1}</span></td>
       <td><strong>${e.name}</strong></td>
       <td><span class="joined-time">🕐 ${time}</span></td>
       <td>${nb}</td>
       <td><div style="display:flex;gap:0.4rem;">
-        ${i===0?`<button class="btn btn-teal btn-sm" onclick="callNext('${e.id}')">✅ Done</button>`:''}
+        ${i === 0 ? `<button class="btn btn-teal btn-sm" onclick="callNext('${e.id}')">✅ Done</button>` : ''}
         <button class="btn btn-danger btn-sm" onclick="removeEntry('${e.id}','${e.name}')">✕</button>
       </div></td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-// ── ACTIONS ───────────────────────────────────────────────────────────────────
-async function callNext(eid) {
-  const e = currentDetailEntries.find(x=>x.id===eid);
-  try {
-    await api(`/api/queues/${currentDetailId}/entries/${eid}/done`, { method:'PATCH', body:{} });
-    showToast(`✅ ${e.name} marked done!`, 'success');
-    if(e.email) showToast(`📧 Notification sent to ${e.email}`, 'success');
-    await loadEntries(currentDetailId);
-  } catch(err) { showToast(err.message, 'error'); }
-}
-
-async function removeEntry(eid, name) {
-  try {
-    await api(`/api/queues/${currentDetailId}/entries/${eid}/remove`, { method:'DELETE' });
-    showToast(`${name} removed`, 'warning');
-    await loadEntries(currentDetailId);
-  } catch(err) { showToast(err.message, 'error'); }
-}
-
-async function clearQueue() {
-  if(!confirm('Remove everyone from this queue?')) return;
-  try {
-    await Promise.all(currentDetailEntries.map(e =>
-      api(`/api/queues/${currentDetailId}/entries/${e.id}/remove`, { method:'DELETE' })
-    ));
-    showToast('Queue cleared!', 'warning');
-    await loadEntries(currentDetailId);
-  } catch(err) { showToast(err.message, 'error'); }
-}
-
-async function toggleStatus(qid, currentStatus) {
-  const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-  try {
-    await api(`/api/queues/${qid}`, { method:'PATCH', body:{ status: newStatus } });
-    showToast(`Queue ${newStatus === 'active' ? 'resumed ▶️' : 'paused ⏸'}`, newStatus==='active'?'success':'warning');
-    loadQueues(); loadDashboard();
-  } catch(err) { showToast(err.message, 'error'); }
-}
-
-async function deleteQueue(qid, name) {
-  if(!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-  try {
-    await api(`/api/queues/${qid}`, { method:'DELETE' });
-    showToast(`"${name}" deleted`, 'error');
-    loadQueues(); loadDashboard();
-  } catch(err) { showToast(err.message, 'error'); }
-}
-
-// ── CREATE QUEUE ──────────────────────────────────────────────────────────────
-async function createQueue() {
-  const name   = document.getElementById('q-name').value.trim();
-  const lat    = document.getElementById('q-lat').value;
-  const lng    = document.getElementById('q-lng').value;
-  const cat    = document.getElementById('q-category').value;
-  const radius = parseInt(document.getElementById('q-radius').value) || 100;
-  const desc   = document.getElementById('q-desc').value.trim();
-
-  if(!name||!lat||!lng){ showToast('Please fill required fields','error'); return; }
-
-  const btn = document.querySelector('#modal .btn-orange');
-  btn.innerHTML = '<span>Creating…</span>'; btn.disabled = true;
-
-  try {
-    const data = await api('/api/queues', {
-      method: 'POST',
-      body: { name, category: cat, lat, lng, radius, description: desc }
-    });
-    closeModal();
-    showToast(`"${name}" created! Share QR to start.`, 'success');
-    // Show QR immediately
-    showQRForQueue(data.queue.id, data.queue.queueUrl, data.qrCode);
-    loadQueues(); loadDashboard();
-  } catch(err) {
-    showToast(err.message, 'error');
-  } finally {
-    btn.innerHTML = 'Create Queue ⚡'; btn.disabled = false;
-  }
-}
-
-// ── QR ────────────────────────────────────────────────────────────────────────
-function showQR() { showQRForQueue(currentDetailId); }
-function showQRForQueue(qid, url, base64) {
-  const q = queues.find(x=>x.id===qid) || {};
-  const qrUrl = url || q.queueUrl || `${window.location.origin}/queue?id=${qid}`;
-  document.getElementById('qr-modal-url').textContent = qrUrl;
-  // Show actual QR image if we have the base64, else show placeholder
-  const box = document.querySelector('#qr-modal .modal > div > div');
-  if(box) {
-    if(base64) {
-      box.innerHTML = `<img src="${base64}" style="width:160px;height:160px;border-radius:12px;"/>`;
-    } else {
-      box.innerHTML = `<div style="width:160px;height:160px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:6rem;">▦</div>`;
+        tbody.appendChild(tr);
+      });
     }
-  }
-  document.getElementById('qr-modal').classList.add('open');
-}
 
-// ── MODAL ─────────────────────────────────────────────────────────────────────
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-  ['q-name','q-lat','q-lng','q-desc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('q-radius').value='100';
-  document.getElementById('qr-url').textContent=`${window.location.origin}/queue?id=••••••`;
-}
-function closeModal(){ document.getElementById('modal').classList.remove('open'); }
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
-document.getElementById('qr-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
-document.getElementById('q-name').addEventListener('input',function(){
-  const slug=this.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').substring(0,8)||'••••••';
-  document.getElementById('qr-url').textContent=`${window.location.origin}/queue?id=${slug}`;
-});
+    // ── ACTIONS ───────────────────────────────────────────────────────────────────
+    async function callNext(eid) {
+      const e = currentDetailEntries.find(x => x.id === eid);
+      try {
+        await api(`/api/queues/${currentDetailId}/entries/${eid}/done`, { method: 'PATCH', body: {} });
+        showToast(`✅ ${e.name} marked done!`, 'success');
+        if (e.email) showToast(`📧 Notification sent to ${e.email}`, 'success');
+        await loadEntries(currentDetailId);
+      } catch (err) { showToast(err.message, 'error'); }
+    }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
-function showToast(msg, type='success') {
-  const icons={success:'✅',warning:'⚠️',error:'🔴'};
-  const t=document.createElement('div');
-  t.className=`toast ${type}`;
-  t.innerHTML=`<span>${icons[type]}</span>${msg}`;
-  document.getElementById('toasts').appendChild(t);
-  setTimeout(()=>t.style.animation='toastIn 0.3s ease reverse',2700);
-  setTimeout(()=>t.remove(),3000);
-}
+    async function removeEntry(eid, name) {
+      try {
+        await api(`/api/queues/${currentDetailId}/entries/${eid}/remove`, { method: 'DELETE' });
+        showToast(`${name} removed`, 'warning');
+        await loadEntries(currentDetailId);
+      } catch (err) { showToast(err.message, 'error'); }
+    }
 
-// ── ANALYTICS (static for now) ────────────────────────────────────────────────
-function renderAnalytics() {
-  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],data=[8,14,11,19,22,17,13],max=Math.max(...data);
-  document.getElementById('bar-chart').innerHTML=days.map((d,i)=>`<div class="bar-group"><div class="bar" style="height:${(data[i]/max)*100}%" title="${data[i]}"></div><div class="bar-label">${d}</div></div>`).join('');
-  const hours=['9AM','10','11','12','1PM','2','3','4','5'],hdata=[3,7,12,9,5,8,11,6,2],hmax=Math.max(...hdata);
-  document.getElementById('hours-chart').innerHTML=hours.map((h,i)=>`<div class="bar-group"><div class="bar" style="height:${(hdata[i]/hmax)*100}%;background:linear-gradient(180deg,var(--teal),rgba(14,173,151,0.3))"></div><div class="bar-label">${h}</div></div>`).join('');
-}
+    async function clearQueue() {
+      if (!confirm('Remove everyone from this queue?')) return;
+      try {
+        await Promise.all(currentDetailEntries.map(e =>
+          api(`/api/queues/${currentDetailId}/entries/${e.id}/remove`, { method: 'DELETE' })
+        ));
+        showToast('Queue cleared!', 'warning');
+        await loadEntries(currentDetailId);
+      } catch (err) { showToast(err.message, 'error'); }
+    }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-loadDashboard();
-</script>
+    async function toggleStatus(qid, currentStatus) {
+      const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+      try {
+        await api(`/api/queues/${qid}`, { method: 'PATCH', body: { status: newStatus } });
+        showToast(`Queue ${newStatus === 'active' ? 'resumed ▶️' : 'paused ⏸'}`, newStatus === 'active' ? 'success' : 'warning');
+        loadQueues(); loadDashboard();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    async function deleteQueue(qid, name) {
+      if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+      try {
+        await api(`/api/queues/${qid}`, { method: 'DELETE' });
+        showToast(`"${name}" deleted`, 'error');
+        loadQueues(); loadDashboard();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    // ── CREATE QUEUE ──────────────────────────────────────────────────────────────
+    async function createQueue() {
+      const name = document.getElementById('q-name').value.trim();
+      const lat = document.getElementById('q-lat').value;
+      const lng = document.getElementById('q-lng').value;
+      const cat = document.getElementById('q-category').value;
+      const radius = parseInt(document.getElementById('q-radius').value) || 100;
+      const desc = document.getElementById('q-desc').value.trim();
+
+      if (!name || !lat || !lng) { showToast('Please fill required fields', 'error'); return; }
+
+      const btn = document.querySelector('#modal .btn-orange');
+      btn.innerHTML = '<span>Creating…</span>'; btn.disabled = true;
+
+      try {
+        const data = await api('/api/queues', {
+          method: 'POST',
+          body: { name, category: cat, lat, lng, radius, description: desc }
+        });
+        closeModal();
+        showToast(`"${name}" created! Share QR to start.`, 'success');
+        // Show QR immediately
+        showQRForQueue(data.queue.id, data.queue.queueUrl, data.qrCode);
+        loadQueues(); loadDashboard();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.innerHTML = 'Create Queue ⚡'; btn.disabled = false;
+      }
+    }
+
+    // ── QR ────────────────────────────────────────────────────────────────────────
+    function showQR() { showQRForQueue(currentDetailId); }
+    function showQRForQueue(qid, url, base64) {
+      const q = queues.find(x => x.id === qid) || {};
+      const qrUrl = url || q.queueUrl || `${window.location.origin}/queue?id=${qid}`;
+      document.getElementById('qr-modal-url').textContent = qrUrl;
+      // Show actual QR image if we have the base64, else show placeholder
+      const box = document.querySelector('#qr-modal .modal > div > div');
+      if (box) {
+        if (base64) {
+          box.innerHTML = `<img src="${base64}" style="width:160px;height:160px;border-radius:12px;"/>`;
+        } else {
+          box.innerHTML = `<div style="width:160px;height:160px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:6rem;">▦</div>`;
+        }
+      }
+      document.getElementById('qr-modal').classList.add('open');
+    }
+
+    // ── MODAL ─────────────────────────────────────────────────────────────────────
+    function openModal() {
+      document.getElementById('modal').classList.add('open');
+      ['q-name', 'q-lat', 'q-lng', 'q-desc'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('q-radius').value = '100';
+      document.getElementById('qr-url').textContent = `${window.location.origin}/queue?id=••••••`;
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+    document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+    document.getElementById('qr-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+    document.getElementById('q-name').addEventListener('input', function () {
+      const slug = this.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').substring(0, 8) || '••••••';
+      document.getElementById('qr-url').textContent = `${window.location.origin}/queue?id=${slug}`;
+    });
+
+    // ── TOAST ─────────────────────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const icons = { success: '✅', warning: '⚠️', error: '🔴' };
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${icons[type]}</span>${msg}`;
+      document.getElementById('toasts').appendChild(t);
+      setTimeout(() => t.style.animation = 'toastIn 0.3s ease reverse', 2700);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    // ── ANALYTICS (static for now) ────────────────────────────────────────────────
+    function renderAnalytics() {
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], data = [8, 14, 11, 19, 22, 17, 13], max = Math.max(...data);
+      document.getElementById('bar-chart').innerHTML = days.map((d, i) => `<div class="bar-group"><div class="bar" style="height:${(data[i] / max) * 100}%" title="${data[i]}"></div><div class="bar-label">${d}</div></div>`).join('');
+      const hours = ['9AM', '10', '11', '12', '1PM', '2', '3', '4', '5'], hdata = [3, 7, 12, 9, 5, 8, 11, 6, 2], hmax = Math.max(...hdata);
+      document.getElementById('hours-chart').innerHTML = hours.map((h, i) => `<div class="bar-group"><div class="bar" style="height:${(hdata[i] / hmax) * 100}%;background:linear-gradient(180deg,var(--teal),rgba(14,173,151,0.3))"></div><div class="bar-label">${h}</div></div>`).join('');
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────────────────────
+    loadDashboard();
+  </script>
 </body>
+
 </html>
