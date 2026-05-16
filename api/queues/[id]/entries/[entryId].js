@@ -1,4 +1,4 @@
-const { db }  = require('../../../_firebase');
+const { supabase } = require('../../../_supabase');
 const { cors } = require('../../../_helpers');
 
 // GET /api/queues/[id]/entries/[entryId]
@@ -7,26 +7,21 @@ module.exports = async (req, res) => {
   if (cors(req, res)) return;
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { id: queueId, entryId } = req.query;
+  const { entryId } = req.query;
 
   try {
-    const entryDoc = await db
-      .collection('queues').doc(queueId)
-      .collection('entries').doc(entryId).get();
+    const { data: entry, error } = await supabase.from('entries').select('*').eq('id', entryId).single();
+    if (error || !entry) return res.status(404).json({ error: 'Entry not found' });
 
-    if (!entryDoc.exists) return res.status(404).json({ error: 'Entry not found' });
+    // Count waiting entries still ahead of this person
+    const { count: aheadCount } = await supabase
+      .from('entries')
+      .select('*', { count: 'exact', head: true })
+      .eq('queue_id', entry.queue_id)
+      .eq('status', 'waiting')
+      .lt('position', entry.position);
 
-    const entry = entryDoc.data();
-
-    // Count how many waiting entries are still ahead of this person
-    const aheadSnap = await db
-      .collection('queues').doc(queueId)
-      .collection('entries')
-      .where('status', '==', 'waiting')
-      .where('position', '<', entry.position)
-      .get();
-
-    const currentPosition = aheadSnap.size + 1;
+    const currentPosition = (aheadCount ?? 0) + 1;
 
     res.json({
       entryId:       entry.id,

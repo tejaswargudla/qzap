@@ -1,5 +1,5 @@
-const { db }   = require('../../../_firebase');
-const { cors, requireAdmin } = require('../../../_helpers');
+const { supabase } = require('../../../../_supabase');
+const { cors, requireAdmin } = require('../../../../_helpers');
 
 // DELETE /api/queues/[id]/entries/[entryId]/remove
 // Admin removes a person from the queue
@@ -10,12 +10,11 @@ module.exports = async (req, res) => {
   const admin = await requireAdmin(req, res);
   if (!admin) return;
 
-  const { id: queueId, entryId } = req.query;
+  const { entryId } = req.query;
 
   try {
-    await db.collection('queues').doc(queueId)
-      .collection('entries').doc(entryId)
-      .delete();
+    const { error } = await supabase.from('entries').delete().eq('id', entryId);
+    if (error) throw error;
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to remove entry' });

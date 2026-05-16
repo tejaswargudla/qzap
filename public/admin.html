@@ -1140,6 +1140,75 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 60;
+      padding: 0.4rem 0 calc(0.4rem + env(safe-area-inset-bottom));
+      flex-direction: row;
+    }
+    .bn-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 0.4rem 0.2rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.58rem;
+      font-weight: 700;
+      transition: color 0.15s;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .bn-item.active { color: var(--orange); }
+    .bn-icon { font-size: 1.25rem; line-height: 1; }
+    .bn-add {
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      color: #fff;
+      margin: -8px auto 0;
+      box-shadow: 0 4px 14px rgba(255,107,53,0.4);
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      .sidebar { display: none; }
+      .bottom-nav { display: flex; }
+      .main { margin-left: 0; padding-bottom: 74px; }
+      .topbar { padding: 0.75rem 1rem; }
+      .topbar-title { font-size: 0.95rem; }
+      .topbar-right .btn-orange { display: none; }
+      .page { padding: 1rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .stat-val { font-size: 1.5rem; }
+      .queues-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .settings-grid { grid-template-columns: 1fr; }
+      .analytics-grid { grid-template-columns: 1fr; }
+      .modal-overlay { align-items: flex-end; }
+      .modal {
+        border-radius: 20px 20px 0 0;
+        max-width: 100%;
+        max-height: 92vh;
+        padding: 1.5rem 1.2rem;
+      }
+      .queue-actions { flex-wrap: wrap; gap: 0.35rem; }
+      .detail-header { flex-wrap: wrap; gap: 0.5rem; }
+      .detail-actions { width: 100%; justify-content: flex-start; }
+      .table-wrap { overflow-x: auto; }
+      table { min-width: 480px; }
+    }
   </style>
 </head>
 
@@ -1149,21 +1218,21 @@
     <div class="sidebar-logo">Queue<span>Zap</span> ⚡</div>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Main</div>
-      <div class="nav-item active" onclick="showPage('dashboard',this)"><span
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)"><span
           class="nav-icon">🏠</span><span>Dashboard</span></div>
-      <div class="nav-item" onclick="showPage('queues',this)"><span class="nav-icon">📋</span><span>My
+      <div class="nav-item" data-page="queues" onclick="showPage('queues',this)"><span class="nav-icon">📋</span><span>My
           Queues</span><span class="nav-badge" id="queue-count-badge">3</span></div>
-      <div class="nav-item" onclick="showPage('analytics',this)"><span class="nav-icon">📊</span><span>Analytics</span>
+      <div class="nav-item" data-page="analytics" onclick="showPage('analytics',this)"><span class="nav-icon">📊</span><span>Analytics</span>
       </div>
       <div class="nav-section-label">Account</div>
-      <div class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span><span>Settings</span>
+      <div class="nav-item" data-page="settings" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span><span>Settings</span>
       </div>
     </nav>
     <div class="sidebar-user" title="Click to logout" onclick="logout()" style="cursor:pointer;">
-      <div class="user-avatar">DR</div>
+      <div class="user-avatar">A</div>
       <div class="user-info">
-        <div class="user-name">Dr. Raj Sharma</div>
-        <div class="user-role">Admin · Logout →</div>
+        <div class="user-name">Admin</div>
+        <div class="user-role">Logout →</div>
       </div>
     </div>
   </aside>
@@ -1182,37 +1251,37 @@
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div style="padding:0 0 1.5rem;">
-        <h1 style="font-size:1.4rem;font-weight:800;">Good morning, Dr. Sharma 👋</h1>
+        <h1 style="font-size:1.4rem;font-weight:800;" id="dash-greeting">Good morning 👋</h1>
         <p style="color:var(--text-muted);font-size:0.88rem;margin-top:0.3rem;">Here's what's happening across your
           queues today.</p>
       </div>
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-top">
-            <div class="stat-icon si-orange">📋</div><span class="stat-change up">↑ 2</span>
+            <div class="stat-icon si-orange">📋</div>
           </div>
-          <div class="stat-val" id="active-count">3</div>
+          <div class="stat-val" id="active-count">—</div>
           <div class="stat-label">Active Queues</div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
-            <div class="stat-icon si-teal">👥</div><span class="stat-change up">↑ 5</span>
+            <div class="stat-icon si-teal">👥</div>
           </div>
-          <div class="stat-val" id="total-waiting">12</div>
+          <div class="stat-val" id="total-waiting">—</div>
           <div class="stat-label">People Waiting</div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
-            <div class="stat-icon si-yellow">✅</div><span class="stat-change up">↑ 8</span>
+            <div class="stat-icon si-yellow">✅</div>
           </div>
-          <div class="stat-val">28</div>
+          <div class="stat-val" id="served-today">—</div>
           <div class="stat-label">Served Today</div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
-            <div class="stat-icon si-red">⏱️</div><span class="stat-change down">↑ 3m</span>
+            <div class="stat-icon si-red">⏱️</div>
           </div>
-          <div class="stat-val">14<span style="font-size:1rem;">m</span></div>
+          <div class="stat-val" id="avg-wait">—</div>
           <div class="stat-label">Avg Wait Time</div>
         </div>
       </div>
@@ -1431,15 +1500,25 @@
       </div>
       <div class="form-group"><label>Description (optional)</label><textarea id="q-desc"
           placeholder="Any info for people joining..."></textarea></div>
-      <div class="form-group"><label>QR Code Preview</label>
-        <div class="qr-preview">
-          <div class="qr-box">▦</div>
-          <p>Your unique QR code will appear here</p><strong id="qr-url">queuezap.app/q/••••••</strong>
-        </div>
-      </div>
-      <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end;" id="modal-form-actions">
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-orange" onclick="createQueue()">Create Queue ⚡</button>
+        <button class="btn btn-orange" id="create-queue-btn" onclick="createQueue()">Create Queue ⚡</button>
+      </div>
+
+      <!-- QR success step (hidden until queue is created) -->
+      <div id="modal-qr-step" style="display:none;text-align:center;">
+        <div style="margin-bottom:1rem;">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">⚡ Queue Created!</div>
+          <p style="font-size:0.82rem;color:var(--text-muted);">Share this QR code at your venue so people can join.</p>
+        </div>
+        <div style="background:var(--surface2);border-radius:16px;padding:1.5rem;margin-bottom:1rem;">
+          <div id="modal-qr-img" style="width:160px;height:160px;background:#fff;border-radius:12px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:6rem;">▦</div>
+        </div>
+        <p id="modal-qr-url" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--orange);margin-bottom:1.2rem;word-break:break-all;"></p>
+        <div style="display:flex;gap:0.75rem;justify-content:center;">
+          <button class="btn btn-ghost" id="modal-copy-btn">📋 Copy Link</button>
+          <button class="btn btn-orange" onclick="closeModal()">Done</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1452,7 +1531,7 @@
         <div class="modal-close" onclick="document.getElementById('qr-modal').classList.remove('open')">✕</div>
       </div>
       <div style="background:var(--surface2);border-radius:16px;padding:2rem;margin-bottom:1.2rem;">
-        <div
+        <div id="qr-modal-img-box"
           style="width:160px;height:160px;background:#fff;border-radius:12px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:6rem;">
           ▦</div>
       </div>
@@ -1461,14 +1540,34 @@
       <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.5rem;">Display at your venue. Users scan to
         join instantly.</p>
       <div style="display:flex;gap:0.75rem;justify-content:center;">
-        <button class="btn btn-ghost" onclick="showToast('Link copied!','success')">📋 Copy Link</button>
-        <button class="btn btn-orange" onclick="showToast('QR downloaded!','success')">⬇️ Download QR</button>
+        <button class="btn btn-ghost" onclick="copyQRLink()">📋 Copy Link</button>
+        <button class="btn btn-orange" onclick="downloadQR()">⬇️ Download QR</button>
       </div>
     </div>
   </div>
 
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav">
+    <div class="bn-item active" data-page="dashboard" onclick="showPage('dashboard',this)">
+      <span class="bn-icon">🏠</span><span>Home</span>
+    </div>
+    <div class="bn-item" data-page="queues" onclick="showPage('queues',this)">
+      <span class="bn-icon">📋</span><span>Queues</span>
+    </div>
+    <div class="bn-item" onclick="openModal()">
+      <div class="bn-add">＋</div><span style="margin-top:2px;">New</span>
+    </div>
+    <div class="bn-item" data-page="analytics" onclick="showPage('analytics',this)">
+      <span class="bn-icon">📊</span><span>Stats</span>
+    </div>
+    <div class="bn-item" data-page="settings" onclick="showPage('settings',this)">
+      <span class="bn-icon">⚙️</span><span>Settings</span>
+    </div>
+  </nav>
+
   <div class="toast-container" id="toasts"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
     // ── CONFIG — update this after Vercel deploy ──────────────────────────────────
     const API = window.location.origin; // same domain since frontend + API are on Vercel
@@ -1510,8 +1609,14 @@
     function showPage(id, el) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.bn-item[data-page]').forEach(n => n.classList.remove('active'));
       document.getElementById('page-' + id).classList.add('active');
-      if (el) el.classList.add('active');
+      if (el && el.classList.contains('nav-item')) el.classList.add('active');
+      // sync both navs
+      const bnMatch = document.querySelector(`.bn-item[data-page="${id}"]`);
+      if (bnMatch) bnMatch.classList.add('active');
+      const sideMatch = document.querySelector(`.nav-item[data-page="${id}"]`);
+      if (sideMatch) sideMatch.classList.add('active');
       const titles = { dashboard: 'Dashboard', queues: 'My Queues', detail: 'Queue Detail', analytics: 'Analytics', settings: 'Settings' };
       document.getElementById('topbar-title').textContent = titles[id] || id;
       if (id === 'dashboard') loadDashboard();
@@ -1548,14 +1653,37 @@
     async function loadDashboard() {
       const c = document.getElementById('dashboard-queues');
       c.innerHTML = '<div style="color:var(--text-muted);padding:2rem;text-align:center;">Loading…</div>';
+
+      // Greeting based on time of day
+      const hr = new Date().getHours();
+      const greeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('dash-greeting').textContent = `${greeting} 👋`;
+
       try {
-        const data = await api('/api/queues/list');
-        queues = data.queues || [];
+        const [listData, statsData] = await Promise.all([
+          api('/api/queues/list'),
+          api('/api/queues/stats'),
+        ]);
+
+        queues = listData.queues || [];
         const active = queues.filter(q => q.status === 'active');
-        document.getElementById('active-count').textContent = active.length;
-        document.getElementById('total-waiting').textContent = queues.reduce((s, q) => s + (q.waitingCount || 0), 0);
+
+        // Update all 4 stat cards with real data
+        document.getElementById('active-count').textContent = statsData.activeCount ?? active.length;
+        document.getElementById('total-waiting').textContent = statsData.totalWaiting ?? 0;
+        document.getElementById('served-today').textContent = statsData.servedToday ?? 0;
+        document.getElementById('avg-wait').innerHTML =
+          statsData.avgWaitMinutes > 0
+            ? `${statsData.avgWaitMinutes}<span style="font-size:1rem;">m</span>`
+            : '—';
+
+        document.getElementById('queue-count-badge').textContent = queues.length;
+
         c.innerHTML = '';
-        if (!active.length) { c.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><h3>No active queues</h3><p>Create a queue to get started</p></div>`; return; }
+        if (!active.length) {
+          c.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><h3>No active queues</h3><p>Create a queue to get started</p></div>`;
+          return;
+        }
         active.forEach(q => renderQueueCard(q, c));
       } catch (err) {
         c.innerHTML = `<div class="empty-state"><div class="es-icon">⚠️</div><h3>Could not load queues</h3><p>${err.message}</p></div>`;
@@ -1700,17 +1828,25 @@
             name, category: cat, description: desc,
             lat: isDemo ? 0 : lat,
             lng: isDemo ? 0 : lng,
-            radius: isDemo ? 999999 : radius, // huge radius = anyone can join
+            radius: isDemo ? 999999 : radius,
             demo: isDemo,
           }
         });
-        closeModal();
-        showToast(`"${name}" created! Share QR to start.`, 'success');
-        showQRForQueue(data.queue.id, data.queue.queueUrl, data.qrCode);
+        // Show QR step inside the modal
+        document.getElementById('modal-form-actions').style.display = 'none';
+        document.getElementById('modal-qr-step').style.display = 'block';
+        const qrUrl = data.queue.queueUrl || `${window.location.origin}/queue?id=${data.queue.id}`;
+        document.getElementById('modal-qr-url').textContent = qrUrl;
+        const imgBox = document.getElementById('modal-qr-img');
+        if (data.qrCode) {
+          imgBox.innerHTML = `<img src="${data.qrCode}" style="width:160px;height:160px;border-radius:12px;"/>`;
+        }
+        document.getElementById('modal-copy-btn').onclick = () => {
+          navigator.clipboard.writeText(qrUrl).then(() => showToast('Link copied!', 'success'));
+        };
         loadQueues(); loadDashboard();
       } catch (err) {
         showToast(err.message, 'error');
-      } finally {
         btn.innerHTML = 'Create Queue ⚡'; btn.disabled = false;
       }
     }
@@ -1723,39 +1859,62 @@
     }
 
     // ── QR ────────────────────────────────────────────────────────────────────────
+    let currentQrDataUrl = null;
+
     function showQR() { showQRForQueue(currentDetailId); }
-    function showQRForQueue(qid, url, base64) {
+
+    async function showQRForQueue(qid, url, base64) {
       const q = queues.find(x => x.id === qid) || {};
       const qrUrl = url || q.queueUrl || `${window.location.origin}/queue?id=${qid}`;
       document.getElementById('qr-modal-url').textContent = qrUrl;
-      // Show actual QR image if we have the base64, else show placeholder
-      const box = document.querySelector('#qr-modal .modal > div > div');
-      if (box) {
-        if (base64) {
-          box.innerHTML = `<img src="${base64}" style="width:160px;height:160px;border-radius:12px;"/>`;
-        } else {
-          box.innerHTML = `<div style="width:160px;height:160px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:6rem;">▦</div>`;
-        }
-      }
+
+      const box = document.getElementById('qr-modal-img-box');
+      box.style.background = '#fff';
+      box.innerHTML = '<span style="font-size:0.7rem;color:#999;">Generating…</span>';
       document.getElementById('qr-modal').classList.add('open');
+
+      try {
+        const dataUrl = base64 || await QRCode.toDataURL(qrUrl, {
+          width: 300, margin: 2,
+          color: { dark: '#1A1A2E', light: '#FFFFFF' },
+        });
+        currentQrDataUrl = dataUrl;
+        box.innerHTML = `<img src="${dataUrl}" style="width:160px;height:160px;border-radius:12px;"/>`;
+      } catch (e) {
+        box.innerHTML = '▦';
+      }
+    }
+
+    function downloadQR() {
+      if (!currentQrDataUrl) return;
+      const queueName = document.getElementById('qr-modal-url').textContent.split('id=')[1] || 'queue';
+      const a = document.createElement('a');
+      a.href = currentQrDataUrl;
+      a.download = `queuezap-${queueName}.png`;
+      a.click();
+      showToast('QR downloaded!', 'success');
+    }
+
+    function copyQRLink() {
+      const url = document.getElementById('qr-modal-url').textContent;
+      navigator.clipboard.writeText(url).then(() => showToast('Link copied!', 'success'));
     }
 
     // ── MODAL ─────────────────────────────────────────────────────────────────────
     function openModal() {
       document.getElementById('modal').classList.add('open');
       ['q-name', 'q-desc'].forEach(id => document.getElementById(id).value = '');
-      // Reset demo mode to ON by default (easier for first time users)
       document.getElementById('demo-toggle').classList.add('on');
       document.getElementById('location-fields').style.display = 'none';
-      document.getElementById('qr-url').textContent = `${window.location.origin}/queue?id=••••••`;
+      // Reset to form step
+      document.getElementById('modal-form-actions').style.display = 'flex';
+      document.getElementById('modal-qr-step').style.display = 'none';
+      const btn = document.getElementById('create-queue-btn');
+      btn.innerHTML = 'Create Queue ⚡'; btn.disabled = false;
     }
     function closeModal() { document.getElementById('modal').classList.remove('open'); }
     document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
     document.getElementById('qr-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
-    document.getElementById('q-name').addEventListener('input', function () {
-      const slug = this.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').substring(0, 8) || '••••••';
-      document.getElementById('qr-url').textContent = `${window.location.origin}/queue?id=${slug}`;
-    });
 
     // ── TOAST ─────────────────────────────────────────────────────────────────────
     function showToast(msg, type = 'success') {

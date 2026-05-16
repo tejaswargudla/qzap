@@ -1,42 +1,28 @@
-const { admin } = require('./_firebase');
-
 // ── CORS ─────────────────────────────────────────────────────────────────────
-// Call at the top of every serverless function
 function cors(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
     res.status(200).end();
-    return true; // caller should return immediately
+    return true;
   }
   return false;
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
-// Returns { uid } if valid, or sends 401 and returns null
 async function requireAdmin(req, res) {
   const header = req.headers.authorization || '';
   if (!header.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Missing authorization header' });
     return null;
   }
-
   const token = header.split(' ')[1];
-
-  // Phase 1 — hardcoded token
   if (token === process.env.ADMIN_SECRET || token === 'admin-token-phase1') {
     return { uid: 'admin' };
   }
-
-  // Phase 2 — Firebase ID token
-  try {
-    const decoded = await admin.auth().verifyIdToken(token);
-    return decoded;
-  } catch {
-    res.status(401).json({ error: 'Invalid or expired token' });
-    return null;
-  }
+  res.status(401).json({ error: 'Invalid token' });
+  return null;
 }
 
 // ── HAVERSINE ─────────────────────────────────────────────────────────────────
